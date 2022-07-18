@@ -61,7 +61,14 @@ def WebSTRHome(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/region/", response_class=HTMLResponse)
 @app.get("/region/{genome}/{query}", response_class=HTMLResponse)
-async def WebSTRRegion(request: Request, genome: str, query: str):
+async def WebSTRRegion(request: Request, genome: str, query: str, \
+	db: Session = Depends(get_db)):
+	if query.strip() == "":
+		raise HTTPException(status_code=404, detail="No query found")
+	if genome.strip() == "":
+		raise HTTPException(status_code=404, detail="No genome selected")
+	if genome.strip() not in utils.get_genomes(db):
+		raise HTTPException(status_code=404, detail="Invalid genome")
 	template_items = {
 		"request": request,
 		"genome": genome,

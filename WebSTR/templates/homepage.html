@@ -15,7 +15,11 @@
       <br>
       Genome build: 
       {% for g in genomes %}
-        <input type="radio" name="genome" value="{{ g }}"> {{ g }}
+        {% if g == "hg38" %}
+          <input type="radio" name="genome" value="{{ g }}" checked> {{ g }}
+        {% else %}
+          <input type="radio" name="genome" value="{{ g }}"> {{ g }}
+        {% endif %}
       {% endfor %}
     <input type="submit">
   </form>
