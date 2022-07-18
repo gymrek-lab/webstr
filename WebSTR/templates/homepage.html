@@ -14,10 +14,9 @@
       placeholder="Search by gene or genomic region"/>
       <br>
       Genome build: 
-      <input type="radio" name="genome" value="hg19"> hg19
-      <input type="radio" name="genome" value="hg38" checked> hg38
-      <input type="radio" name="genome" value="mm10"> mm10
-      <input type="radio" name="genome" value="rn7"> rn7
+      {% for g in genomes %}
+        <input type="radio" name="genome" value="{{ g }}"> {{ g }}
+      {% endfor %}
     <input type="submit">
   </form>
   <p class="text-muted">

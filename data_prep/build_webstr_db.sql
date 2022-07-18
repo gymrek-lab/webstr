@@ -1,0 +1,9 @@
+--Create GENOMES table
+CREATE TABLE GENOMES (
+	genome_id int,
+    genome_build varchar(10)
+);
+INSERT INTO GENOMES VALUES (1, 'hg19');
+INSERT INTO GENOMES VALUES (2, 'hg38');
+INSERT INTO GENOMES VALUES (3, 'mm10');
+INSERT INTO GENOMES VALUES (4, 'rn7');

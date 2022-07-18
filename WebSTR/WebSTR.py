@@ -4,39 +4,80 @@ WebSTR v2 database application
 """
 
 import argparse
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import os
+from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from starlette.responses import FileResponse 
 import uvicorn
 
+import utils
+
+#################### Paths ########################################
+BASE_DIR = "/Users/melissagymrek/workspace/webstr/"
+STATIC_DIR = os.path.join(BASE_DIR, "WebSTR", "static")
+TEMPLATE_DIR = os.path.join(BASE_DIR, "WebSTR", "templates")
+
+# NOTE: change this to modify database location
+SQLALCHEMY_DATABASE_URL = "sqlite:////Users/melissagymrek/workspace/webstr/data_prep/webstr2.db"
+
+#################### Set up the database ##########################
+import utils, models, schemas
+
+# NOTE: if not using sqlite, set "check_same_thread": True
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+models.Base.metadata.create_all(bind=engine)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 #################### Set up the app ##########################
+
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=STATIC_DIR))
+templates = Jinja2Templates(directory=TEMPLATE_DIR)
 
 #################### Functions to render pages ##########################
 
 @app.get("/", response_class=HTMLResponse)
-async def WebSTRHome(request: Request):
-    return templates.TemplateResponse("homepage.html", {"request": request})
+def WebSTRHome(request: Request, db: Session = Depends(get_db)):
+	template_items = {
+		"request": request,
+		"genomes": utils.get_genomes(db)
+	}
+	return templates.TemplateResponse("homepage.html", template_items)
 
 @app.get("/region/", response_class=HTMLResponse)
 @app.get("/region/{genome}/{query}", response_class=HTMLResponse)
 async def WebSTRRegion(request: Request, genome: str, query: str):
-	template_items = {"request": request, \
-	                "genome": genome, \
-					"query": query}
+	template_items = {
+		"request": request,
+		"genome": genome,
+		"query": query
+	}
 	return templates.TemplateResponse("region.html", template_items)
 
 @app.get("/locus/", response_class=HTMLResponse)
 @app.get("/locus/{genome}/{trsetid}/{strid}", response_class=HTMLResponse)
 async def WebSTRLocus(request: Request, genome: str, trsetid: str, strid: str):
-	template_items = {"request": request, \
-	                "genome": genome, \
-	                "trsetid": trsetid,
-					"strid": strid}
+	template_items = {
+		"request": request,
+		"genome": genome,
+		"trsetid": trsetid,
+		"strid": strid
+	}
 	return templates.TemplateResponse("locus.html", template_items)
 
 #################### Set up and run the server ###############
