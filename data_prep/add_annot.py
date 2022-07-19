@@ -71,7 +71,9 @@ def ParseGTFLine(gtfline, build, annot_id):
 	metadata = items[8].strip().split(";")
 	for item in metadata:
 		if item.strip() == "": continue
-		key, val = item.strip().split()
+                try:
+                        key, val = item.strip().split()
+                except: continue
 		if key == "gene_name":
 			gene_name = val.strip('"').strip()
 		if key == "gene_id":
