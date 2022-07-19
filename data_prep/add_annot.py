@@ -92,6 +92,7 @@ with gzip.open(GTF, "r") as f:
 		line = line.decode("utf-8") 
 		if line.startswith('#'): continue
 		db_items = ParseGTFLine(line, BUILD, annot_id)
+		#print(db_items)
 		conn = sqlite3.connect(DBFILE)
 		curr = conn.cursor()
 		curr.execute('insert into GENEANNOTATIONS values (?,?,?,?,?,?,?,?,?,?)', db_items)		
