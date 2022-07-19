@@ -5,6 +5,7 @@ WebSTR database and web application code
 
 * fastapi
 * sqlite
+* sqlalchemy
 
 ## Running the webserver
 
