@@ -15,7 +15,7 @@ curl -o gene_annots/rn7.gtf.gz http://ftp.ensembl.org/pub/release-107/gtf/rattus
 # Add gene annotations
 for build in hg19 hg38 mm10 rn7
 do
-	echo "start $$build"
+	echo "start $build"
 	./add_annot.py $build gene_annots/${build}.gtf.gz webstr2.db
 	echo "Completed $build"
 done
