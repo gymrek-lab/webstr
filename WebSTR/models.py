@@ -12,7 +12,7 @@ class Genome(Base):
 class GeneAnnotations(Base):
 	__tablename__ = "GENEANNOTATIONS"
 	feature_id = Column(Integer, primary_key=True, index=True)
-	genome_buid = Column(String)
+	genome_buid = Column(String, ForeignKey("GENOMES.genome_build")),
 	feature_chrom = Column(String)
 	feature_type = Column(String)
 	feature_start = Column(Integer)

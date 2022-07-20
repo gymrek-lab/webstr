@@ -16,6 +16,7 @@ from starlette.responses import FileResponse
 import uvicorn
 
 import utils
+import region
 
 #################### Paths ########################################
 BASE_DIR = "/Users/melissagymrek/workspace/webstr/"
@@ -69,11 +70,10 @@ async def WebSTRRegion(request: Request, genome: str, query: str, \
 		raise HTTPException(status_code=404, detail="No genome selected")
 	if genome.strip() not in utils.get_genomes(db):
 		raise HTTPException(status_code=404, detail="Invalid genome")
-	template_items = {
-		"request": request,
-		"genome": genome,
-		"query": query
-	}
+	template_items, passed, err = region.GetRegionItems(db, genome, query)
+	if not passed:
+		raise HTTPException(status_code=404, detail=err)
+	template_items["request"] = request
 	return templates.TemplateResponse("region.html", template_items)
 
 @app.get("/locus/", response_class=HTMLResponse)
