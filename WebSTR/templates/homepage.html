@@ -1,30 +1,80 @@
 {% extends "layout.html" %}
 {% block body %}
+    <script>
+        $('#navbar_form_container').hide();
+    </script>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+      
+          <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light bg-image">
+            
+                  <h1 id="home-title" class="display-4 font-weight-normal">
+                    WebSTR: a population-wide database of short tandem repeat variation in humans
+                  </h1>
+            
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+            <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light">
+              <div id="home-searchbox">
+                <form action="/search">
+                    <div class="form-group">
+                      <select name="genome" class="form-control">
+                        <option selected value="hg38">H. Sapiens (hg38)</option>
+                        <option value="hg19">H. Sapiens (hg19)</option>
+                      </select>
+                      <small class="form-text text-muted">
+                        Pick a genome
+                      </small>
+                    </div>
 
-<h1 id="home-title">
-  WebSTR: a population-wide database of short tandem repeat variation in humans
-</h1>
-<div id="home-searchbox">
-  <form action="/region">
-    <input type="submit" style="display: none;"/>
-    <input id="home-searchbox-input" 
-      name="query" 
-      type="text" 
-      placeholder="Search by gene or genomic region"/>
-      <br>
-      Genome build: 
-      {% for g in genomes %}
-        {% if g == "hg38" %}
-          <input type="radio" name="genome" value="{{ g }}" checked> {{ g }}
-        {% else %}
-          <input type="radio" name="genome" value="{{ g }}"> {{ g }}
-        {% endif %}
-      {% endfor %}
-    <input type="submit">
-  </form>
-  <p class="text-muted">
-  Examples - Gene: <a href="/region/hg38/PCSK9">PCSK9</a>,
-  Region: <a href="/region/hg38/22:46615715-46625880">22:46615715-46625880</a>
-   </p>
-</div>
-{% endblock %}
+                    <div class="form-group">              
+                      <input id="home-searchbox-input" name="query" class="form-control mr-sm-2" type="text" placeholder="Get started by searching for a gene or genomic region"/>
+                      <small class="form-text text-muted">
+                        Examples - Gene: <a href="/search?query=PCSK9&genome=hg38">PCSK9</a>,
+                        Region: <a href="/search?query=22:46615715-46625880&genome=hg19">22:46615715-46625880</a>
+                      </small>
+                    </div>  
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
+              </div>
+           </div>
+        </div>    
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+            
+          <div class="p-3 p-md-5 m-md-3 text-center">
+                  <p>
+                  WebSTR contains population and genome-wide information about genetic variation and other characteristics of short tandem repeats (STRs) in humans.
+                  </p>
+                  
+                  <p>
+                  The <a href="/about">about</a> page describes the available datasets in detail and a brief tutorial to help you get started.
+                  </p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+<!--
+      <div class="row" style="font-size: 16px;">
+	<div class="col-md-4">
+	  <h3 align="center">About WebSTR</h3>
+	  <center><a href="/about"><img width="25%" src="static/images/about.png"></a></center>
+	</div>
+	<div class="col-md-4">
+          <h3 align="center">FAQ</h3>
+	  <center><a href="/faq"><img width="25%" src="static/images/question_mark.png"></a></center>
+	</div>
+	<div class="col-md-4">
+	  <h3 align="center">Downloads</h3>
+	  <center><a href="/downloads"><img width="25%" src="static/images/newspaper-10-xxl.png"></a></center>
+	</div>
+      </div>
+      <div class="row" style="font-size: 16px;"><br><br><br><br></div> -->
+    <br><br><br><br><br><br><br><br><br><br><br><br>
+    {% endblock %}

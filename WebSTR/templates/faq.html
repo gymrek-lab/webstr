@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="container" style="font-size: 16px;">
+        <h1>Frequently Asked Questions</h1>
+        <ul class="media-list">
+            <li class="media">
+                <div class="media-body">
+                    <h4 class="media-heading">What is the definition of "short tandem repeat"?</h4>
+<p>
+We consider repeats with motif lengths between 1-6bp. E.g. AAAAA, ACACACACAC, CAGCAGCAGCAG, TATCTATCTATCTATCTATC, TTTTGTTTTGTTTTGTTTTG, AAAAACAAAAACAAAAAC would all fall under this definition. The set of STRs used by WebSTR was obtained from the HipSTR hg19 reference STR file.
+</p>
+                    <h4 class="media-heading">What STR tools were used to generate results displayed on WebSTR?</h4>
+		    <p>
+		      We have helped develop <a href="https://github.com/mgymrek/lobstr-code">lobSTR</a> and <a href="https://github.com/tfwillems/HipSTR">HipSTR</a> for genome-wide genotyping of STRs from next-generation sequencing data. Earlier work (mutation rates and constraint) are based on genotypes obtained using lobSTR. More recent work (GTEx eSTRs, imputation results) are based on genotypes obtained using HipSTR.
+		      </p>
+                    <h4 class="media-heading">Does WebSTR display allele frequency information?</h4>
+		    <p>
+ Not yet, but this is coming soon! We plan to display allele frequency information for several cohorts consisting of European, African, and East Asian ancestry. Stay tuned!
+		      </p>
+		    <h4 class="media-heading">I have generated information I would like to be displayed in WebSTR. How can I add it to the site?</h4>
+		    <p>
+		      We would love to include your dataset! Contact mgymrek AT ucsd DOT edu to discuss adding summary level STR statistics or allele frequencies for a different cohort to the site.
+		    </p>
+                </div>
+            </li>
+        </ul>
+    </div>
+{% endblock %}

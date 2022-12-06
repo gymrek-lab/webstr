@@ -1,96 +1,239 @@
 #!/usr/bin/env python3
 """
-WebSTR v2 database application
+WebSTR database application
 """
 
 import argparse
-from fastapi import Depends, FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+#import dash
+from flask import Flask, redirect, render_template, request, session, url_for
+#from dash.dependencies import Output, Input, State
+from collections import deque
+import pandas as pd
+import numpy as npa
+import json
+from textwrap import dedent as d
+import sys
 import os
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from starlette.responses import FileResponse 
-import uvicorn
 
-import utils
-import region
+#from locus_view_dash import *
+from locus_view import *
+from region_view import *
 
-#################### Paths ########################################
-BASE_DIR = "/Users/melissagymrek/workspace/webstr/"
-STATIC_DIR = os.path.join(BASE_DIR, "WebSTR", "static")
-TEMPLATE_DIR = os.path.join(BASE_DIR, "WebSTR", "templates")
+#################### Database paths ###############
+PLATFORM = "snorlax" # or AWS
+BASEPATH =  "/home/oxana/projects/dbstr/data/"
+if PLATFORM == "snorlax":
+    #BasePath = "/storage/resources/dbase/dbSTR/SS1/" # TODO this is allele freq. not used now
+    #DbSTRPath = "/storage/resources/dbase/dbSTR/"
+    #RefFaPath_hg19 = "/storage/resources/dbase/human/hg19/hg19.fa"
+    DbSTRPath = BASEPATH
+    RefFaPath_hg19 = BASEPATH + "hg19.fa"
+    RefFaPath_hg38 = BASEPATH + "hg38.fa"
+elif PLATFORM == "AWS":
+    #BasePath = ""
+    DbSTRPath = ""
+    RefFaPath_hg19 = "" # TODO
+else:
+    sys.stderr.write("Could not locate database files\n")
+    sys.exit(1)
 
-# NOTE: change this to modify database location
-SQLALCHEMY_DATABASE_URL = "sqlite:////Users/melissagymrek/workspace/webstr/data_prep/webstr2.db"
+#################### Set up flask server ###############
+server = Flask(__name__)
+server.secret_key = 'dbSTR' 
 
-#################### Set up the database ##########################
-import utils, models, schemas
+#################### Render locus page ###############
+#app = dash.Dash(__name__, server=server, url_base_pathname='/dashapp')
+#app.config['suppress_callback_exceptions']=True
+#SetupDashApp(app)
+#
+#@app.callback(dash.dependencies.Output('field-dropdown','value'),
+#              [dash.dependencies.Input('url', 'href')])
+#def main_display_page(href): return display_page(href)
+#
+#@app.callback(Output('table2', 'rows'), [Input('field-dropdown', 'value')])
+#def main_update_table(user_selection): return update_table(user_selection, BasePath)
+#
+#@app.callback(Output('STRtable', 'rows'), [Input('field-dropdown', 'value')])
+#def main_getdata(user_selection): return getdata(user_selection, BasePath)
+#
+#@app.callback(Output('Main-graphic','figure'),
+#              [Input('table2','rows')])
+#def main_update_figure(rows): return update_figure(rows)
 
-# NOTE: if not using sqlite, set "check_same_thread": True
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+#################### Render region page ###############
 
-models.Base.metadata.create_all(bind=engine)
+@server.route('/search')
+def search():
+    region_queryGenome = request.args.get('genome')
+    print("Selected genome")
+    print(region_queryGenome)
+    print("___________________________________")
+    region_queryOrg = request.args.get('query')
+    print(region_queryOrg)
+    region_query = region_queryOrg.upper()
 
-def get_db():
-    db = SessionLocal()
+    if (region_queryGenome == 'hg19'):
+        region_data = GetRegionData(region_query, DbSTRPath)
+        
+        if region_data.shape[0] > 0:
+            strs_id = region_data.strid.unique()
+
+            H_data = GetHCalc(strs_id,DbSTRPath)
+            estr_data = GetestrCalc(strs_id,DbSTRPath)
+            Regions_data = pd.merge(region_data, H_data, left_on='strid', right_on = 'str_id')
+            Regions_data = pd.merge(Regions_data, estr_data, left_on='strid', right_on = 'str_id', how='left')
+            Regions_data = Regions_data.replace(np.nan, '', regex=True)
+            # Get the STRs on the plotly graph
+            print("About to start with the graph")
+            Regions_data.rename(columns = {'chrom':'chr', 'str.start':'start', 'str.end': 'end'}, inplace = True)
+            print(Regions_data)
+            #chrom = Regions_data["chr"].values[0].replace("chr","")
+            gene_trace, gene_shapes, numgenes, min_gene_start, max_gene_end = GetGeneShapes(region_query, DbSTRPath)
+            print(max_gene_end)
+            region_data2 = Regions_data
+            #if (max_gene_end) > 0:
+            #    region_data2 =  GetRegionData(region_data["chr"].values[0] + ":" + str(min_gene_start) + "-" + str(max_gene_end), DbSTRPath)
+
+            plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data2, gene_trace, gene_shapes, numgenes)
+
+            return render_template('view2.html',
+                                table = Regions_data.to_records(index=False),
+                                graphJSON = plotly_plot_json, layoutJSON = plotly_layout_json,
+                                chrom = region_data["chr"].values[0].replace("chr",""),
+                                strids = list(Regions_data["strid"]),
+                                genome = region_queryGenome) 
+        else:
+            return render_template('view2_nolocus.html')
+    else:
+        # Use the API, because hg38 is requested
+        region_data_hg38 = GetRegionDataAPI(region_query)
+        if region_data_hg38.shape[0] > 0:
+            gene_trace_hg38, gene_shapes_hg38, numgenes_hg38, min_gene_start_hg38, max_gene_end_hg38 = GetGeneGraph(region_query)
+            plotly_plot_json_hg38, plotly_layout_json_hg38 = GetGenePlotlyJSON(region_data_hg38, gene_trace_hg38, gene_shapes_hg38, numgenes_hg38)
+            print(region_data_hg38.to_records(index=False))
+            return render_template('view2.html',
+                                    table = region_data_hg38.to_records(index=False),
+                                    graphJSON = plotly_plot_json_hg38, layoutJSON = plotly_layout_json_hg38,
+                                    chrom = region_data_hg38["chr"].values[0].replace("chr",""),
+                                    strids = list(region_data_hg38["repeat_id"]),
+                                    genome = region_queryGenome)
+        else:
+            return render_template('view2_nolocus.html')
+
+
+
+@server.route('/locus')
+def locusview():
+    print("locusview")
+    str_query = request.args.get('repeat_id')
+    genome_query = request.args.get('genome')
+    print((genome_query == 'hg38'))
+    mut_data = []
+    imp_data = []
+    gtex_data = []
+    imp_allele_data = []
+    freq_dist = []
+    crc_data = []
+    gene_name = ""
+    gene_desc = ""
+    motif = ""
+    copies = ""
+    plotly_plot_json_datab = dict()
+    plotly_plot_json_layoutb = dict()
+
+    if ((genome_query is None) or (genome_query == 'hg19')):
+        reffa = pyfaidx.Fasta(RefFaPath_hg19)
+
+        chrom, start, end, motif, copies, seq = GetSTRInfo(str_query, DbSTRPath, reffa)
+        gtex_data = GetGTExInfo(str_query, DbSTRPath)
+        mut_data = GetMutInfo(str_query, DbSTRPath)
+        imp_data = GetImputationInfo(str_query, DbSTRPath)
+        imp_allele_data = GetImputationAlleleInfo(str_query, DbSTRPath)
+        freq_dist = GetFreqSTRInfo(str_query, DbSTRPath)
+        print(freq_dist)
+        if len(freq_dist) > 0:
+            plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON2(freq_dist)
+        
+    elif (genome_query == 'hg38'):
+        print("locus view hg38")
+        reffa = pyfaidx.Fasta(RefFaPath_hg38)
+        chrom, start, end, seq, gene_name, gene_desc, motif, copies, crc_data = GetSTRInfoAPI(str_query, reffa)
+        freq_dist = GetFreqSTRInfoAPI(str_query)
+        if len(freq_dist) > 0:
+            plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
+        
+    if len(mut_data) != 1: mut_data = None
+    else:
+        mut_data = list(mut_data[0])
+        mut_data[0] = 10**mut_data[0]
+    if len(imp_data) != 1: imp_data = None
+    else:
+        imp_data = list(imp_data[0])
+
+    if len(gtex_data) == 0: gtex_data = None
+    if len(crc_data) == 0: crc_data = None
+    if len(imp_allele_data) == 0: imp_allele_data = None
+
+    
+    print("about to render")
+    return render_template('locus.html', strid=str_query,
+                           graphJSONx=plotly_plot_json_datab,graphlayoutx=plotly_plot_json_layoutb, 
+                           chrom=chrom.replace("chr",""), start=start, end=end, strseq=seq,
+                           gene_name=gene_name, gene_desc=gene_desc,
+                           estr=gtex_data, mut_data=mut_data, motif=motif, copies=copies, crc_data = crc_data,
+                           imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist)
+
+#################### Render HTML pages ###############
+@server.route('/')
+@server.route('/dbSTR')
+def dbSTRHome():
+    return render_template('homepage.html')
+
+@server.route('/faq')
+def dbSTRFAQ():
+    return render_template("faq.html")
+
+@server.route('/contact')
+def dbSTRContact():
+    return render_template("contact.html")
+
+@server.route('/about')
+def dbSTRAbout():
+    return render_template("about.html")
+
+@server.route('/downloads')
+def dbSTRDownloads():
+    return render_template("downloads.html")
+
+@server.route('/terms')
+def dbSTRTerms():
+    return render_template("terms.html")
+
+@server.route('/url')
+def my_method():
     try:
-        yield db
-    finally:
-        db.close()
+        call_method_that_raises_exception()
+    except Exception as e:
+            render_template("500.html", error= str(e))
 
-#################### Set up the app ##########################
+@server.errorhandler(404)
+def internal_server_error(error):
+    server.logger.error('Server Error: %s', (error))
+    return render_template('500.htm', emsg = error), 404
 
-app = FastAPI()
-app.mount("/static", StaticFiles(directory=STATIC_DIR))
-templates = Jinja2Templates(directory=TEMPLATE_DIR)
-
-#################### Functions to render pages ##########################
-
-@app.get("/", response_class=HTMLResponse)
-def WebSTRHome(request: Request, db: Session = Depends(get_db)):
-	template_items = {
-		"request": request,
-		"genomes": utils.get_genomes(db)
-	}
-	return templates.TemplateResponse("homepage.html", template_items)
-
-@app.get("/region/", response_class=HTMLResponse)
-@app.get("/region/{genome}/{query}", response_class=HTMLResponse)
-async def WebSTRRegion(request: Request, genome: str, query: str, \
-	db: Session = Depends(get_db)):
-	if query.strip() == "":
-		raise HTTPException(status_code=404, detail="No query found")
-	if genome.strip() == "":
-		raise HTTPException(status_code=404, detail="No genome selected")
-	if genome.strip() not in utils.get_genomes(db):
-		raise HTTPException(status_code=404, detail="Invalid genome")
-	template_items, passed, err = region.GetRegionItems(db, genome, query)
-	if not passed:
-		raise HTTPException(status_code=404, detail=err)
-	template_items["request"] = request
-	return templates.TemplateResponse("region.html", template_items)
-
-@app.get("/locus/", response_class=HTMLResponse)
-@app.get("/locus/{genome}/{trsetid}/{strid}", response_class=HTMLResponse)
-async def WebSTRLocus(request: Request, genome: str, trsetid: str, strid: str):
-	template_items = {
-		"request": request,
-		"genome": genome,
-		"trsetid": trsetid,
-		"strid": strid
-	}
-	return templates.TemplateResponse("locus.html", template_items)
+@server.errorhandler(Exception)
+def unhandled_exception(e):
+    server.logger.error('Unhandled Exception: %s', (e))
+    return render_template('500.html', emsg = e), 500
+ 
 
 #################### Set up and run the server ###############
-if __name__ == "__main__":
-	parser = argparse.ArgumentParser(__doc__)
-	parser.add_argument("--host", help="Host to run app", type=str, default="0.0.0.0")
-	parser.add_argument("--port", help="Port to run app", type=int, default=5000)
-	args = parser.parse_args()
-	uvicorn.run(app, host=args.host, port=args.port)
+def main():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument("--host", help="Host to run app", type=str, default="0.0.0.0")
+    parser.add_argument("--port", help="Port to run app", type=int, default=5000)
+    args = parser.parse_args()
+    server.run(debug=False, host=args.host, port=args.port)
+
+if __name__ == '__main__':
+    main()

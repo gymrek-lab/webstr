@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<!-- Main table of STRs in this region -->
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      <h1>No STRs found in this region.</h1>
+      <h4>Check that the gene is spelled correctly or the region is in the format chrom:start-end and not more than 1Mb is specified.</h4>
+      <h4>e.g. 
+	<br>
+	<a href="/awesome?query=PCSK9">PCSK9</a> 
+	<br>
+	<a href="/awesome?query=22:46615715-46625880">22:46615715-46625880</a>
+	<br>
+	<a href="/awesome?query=chr22:46615715-46625880">chr22:46615715-46625880</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,11 +1,256 @@
 {% extends "layout.html" %}
+
 {% block body %}
 
-Hello world
+<!-- Div for the plotly chart -->
+<script type="text/javascript">
+$('button').collapse({
+    toggle: false
+  }).on('show',function (e) {
+        $(e.target).parent().find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-up");
+      }).on('hide', function (e) {
+        $(e.target).parent().find(".icon-chevron-up").removeClass("icon-chevron-up").addClass("icon-chevron-down");
+      });
+</script>
 
-<br>
-Genome : {{ genome }} <br>
-TRSetID : {{ trsetid }} <br>
-STRID : {{ strid }} <br>
+
+<style>
+table {
+  border-collapse: collapse;
+  border: 1px solid black;
+} 
+
+th,td {
+  border: 1px solid black;
+}
+
+table.tables1 {
+  table-layout: fixed;
+  width: 100%;  
+}
+
+</style>
+
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-md-10 col-md-offset-1">
+	  <br><br>	
+      <h1>STR chr{{ chrom }}:{{ start }}-{{ end }}</h1>
+		
+	
+	
+      <button class="collapsible active">Reference sequence</button>
+      <div class="content" style="display:block">
+	<p>
+		<h4>Motif {{ motif }} repeats {{ copies }} times in the reference sequence. </h4>
+	  <br> 
+	  {{ strseq|safe }}
+	</p>
+
+	
+      </div>
+      <br> 
+	  <button class="collapsible active">Gene mapping</button>
+	   <div>
+		  {% if gene_name == "" %}
+		   <p> No gene information available </p>
+		   {% else %}
+		   <p> Maps to {{ gene_name }}, {{ gene_desc }} </p>
+		   {% endif %}
+		</div>   
+      <!-- Div for the plotly chart -->
+        <button class="collapsible">Allele Frequency</button>
+		<div class="content">
+	<div id="barchart" class="chart" ></div>
+	{% if graphJSONx == {} %}
+	<p> No data on allele frequencies in healthy genomes available. </p>
+	{% else %}
+    <script type="text/javascript">
+        var graphsx = {{graphJSONx | safe}};
+        var graphslayoutx = {{graphlayoutx | safe}};
+		var barchart = document.getElementById('barchart');
+        Plotly.newPlot(barchart,graphsx,graphslayoutx);
+    </script>
+	{% endif %}
+</div>
+     <br><br>
+	 <button class="collapsible">Variation in Colorectal Cancer (TCGA cohort)</button>
+      <div class="content  justify-content-center">
+         {% if crc_data == None %}
+          <p> No Data Available. </p>
+          {% else %}
+		  
+	<table border="1" cellpadding="5" cellspacing="5" class="tablesorter">
+	  <thead class="tablesorter-header"><th>Parameter</th><th>Value</th></thead>
+	  <tbody>
+	    <tr>
+	      <td><b>Total calls</b></td>
+	      <td>{{ crc_data[0]  }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>Fraction variable</b></td>
+	      <td>{{ '%.3f' % crc_data[1]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>Average length difference</b></td>
+	      <td>{{ '%.3f' % crc_data[2]|float }}</td>
+	    </tr>
+	    
+	  </tbody>
+	</table>
+
+        {% endif %}
+		See the <a href="/about">about page</a> for detailed description of each parameter.
+	</div>
+		<br><br>
+      <button class="collapsible">Expression STRs</button>
+      <div class="content">
+          {% if estr == None %}
+          <p> No eSTRs found. </p>
+          {% else %}
+	<table class="tables1" border="1" cellpadding="4" cellspacing="4" style="table-layout: fixed; width: 100%">
+         <colgroup>
+             <col style="width: auto" />
+         </colgroup>
+	  <thead class="tables1"><th>Gene (ENS)</th><th>Tissue</th><th>Beta (SE)</th><th>P-value</th><th>CAVIAR</th></thead>
+	    {% for d in estr %}
+	    <tr>
+	      <td>{{ d[1] }} ({{ d[0] }})</td>
+	      <td>{{ d[2] }}</td>
+	      <td>{{ '%0.2f' % d[3]|float }} ({{ '%0.2f' % d[4]|float }})</td>
+	      <td>{{ '%0.2e' % d[5]|float }}</td>
+              <td>{{ '%0.2f' % d[6]|float }}</td>
+	    </tr>
+	    {% endfor %}
+	</table>
+        {% endif %}
+	See the <a href="/about">about page</a> for detailed description of each parameter.
+      </div>
+      <br><br>
+      <button class="collapsible">Mutation and constraint</button>
+      <div class="content">
+         {% if mut_data == None %}
+          <p> No Data Available. </p>
+          {% else %}
+	<table border="1" cellpadding="5" cellspacing="5" class="tablesorter tablesorter-default">
+	  <thead class="tablesorter-header"><th>Parameter</th><th>Value</th></thead>
+	  <tbody>
+	    <tr>
+	      <td><b>Mutation model: Mutation rate</b></td>
+	      <td>{{ '%.2e' % mut_data[0]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>Mutation model: Beta</b></td>
+	      <td>{{ '%.3f' % mut_data[1]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>Mutation model: P(single step)</b></td>
+	      <td>{{ '%.3f' % mut_data[2]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>Constraint (Z-score)</b></td>
+	      <td>{{ '%.3f' % mut_data[6]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>Stutter model: up</b></td>
+	      <td>{{ '%.3f' % mut_data[3]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>Stutter model: down</b></td>
+	      <td>{{ '%.3f' % mut_data[4]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>Stutter model: p</b></td>
+	      <td>{{ '%.3f' % mut_data[5]|float }}</td>
+	    </tr>
+	  </tbody>
+	</table>
+        {% endif %}
+	See the <a href="/about">about page</a> for detailed description of each parameter.
+      </div>
+      <br><br>
+      <button class="collapsible">STR Imputation</button>
+      <div class="content">
+	<h4>Locus-level imputation metrics</h4>
+        {% if imp_data  == None %}
+          <p> No Data Available. </p>
+          {% else %}
+	<table border="1" cellpadding="5" cellspacing="5" class="tableshorter tablesorter-default">
+	  <thead class="tablesorter-header"><th>Parameter</th><th>Value</th></thead>
+	  <tbody>
+	    <tr>
+	      <td><b>SSC - Concordance</b></td>
+	      <td>{{ '%.2f' % imp_data[0]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>SSC - r</b></td>
+	      <td>{{ '%.2f' % imp_data[1]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>1000 (EUR) - Concordance</b></td>
+	      <td>{{ '%.2f' % imp_data[2]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>1000G (EUR) - r</b></td>
+	      <td>{{ '%.2f' % imp_data[3]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>1000 (AFR) - Concordance</b></td>
+	      <td>{{ '%.2f' % imp_data[4]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>1000G (AFR) - r</b></td>
+	      <td>{{ '%.2f' % imp_data[5]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>1000 (EAS) - Concordance</b></td>
+	      <td>{{ '%.2f' % imp_data[6]|float }}</td>
+	    </tr>
+	    <tr>
+	      <td><b>1000G (EAS) - r</b></td>
+	      <td>{{ '%.2f' % imp_data[7]|float }}</td>
+	    </tr>
+	  </tbody>
+	</table>
+        {% endif %}
+	<h4>Allele-level imputation metrics </h4>
+        {% if imp_data  == None %}
+          <p> No Data Available. </p>
+          {% else %}
+	<table border="1" cellpadding="5" cellspacing="5" class="tableshorter tablesorter-default">
+	  <thead class="tablesorter-header"><th>Allele (bp diff from hg19)</th><th>r2</th><th>P-val</th></thead>
+	  <tbody>
+	    {% for d in imp_allele_data %}
+	    <tr>
+	      <td>{{ d[0] }}</td>
+	      <td>{{ '%0.2f' % d[1]|float }}</td>
+	      <td>{{ '%0.3e' % d[2]|float }}</td>
+	    </tr>
+	    {% endfor %}
+	  </tbody>
+	</table>
+        {% endif %}
+	See the <a href="/about">about page</a> for detailed description of each parameter.
+      </div>
+      <br><br><br><br>
+    </div>
+  </div>
+</div>
+    <script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
 
 {% endblock %}

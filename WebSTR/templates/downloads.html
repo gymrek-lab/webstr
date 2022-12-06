@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="container" style="font-size: 16px;">
+      <div class="row">
+	  <h1>Data sources</h1>
+      WebSTR data is taken directly from these sources:
+<ul>
+  <li>HipSTR hg19 reference STR regions available from the HipSTR github page <a href="https://github.com/HipSTR-Tool/HipSTR-references/blob/master/human/hg19.hipstr_reference.bed.gz">hg19.hipstr_reference.bed.gz</a></li>
+  <li>Gene annotations use GENCODE version 19 (Ensembl 74) available in the file genocde.gtf.gz obtained from the <a href="http://broadinstitute.org/~konradk/exac_browser/exac_browser.tar.gz">ExAC data download</a></li>
+  <li>Imputation metrics from Supplementary Tables 1 and 2 of <a href="https://www.nature.com/articles/s41467-018-06694-0">Saini et al 2018</a></li>
+  <li>Mutation rate and constraint information from Gymrek et al. 2017 available for download from <a href="https://s3-us-west-2.amazonaws.com/strconstraint/Gymrek_etal_SupplementalData1_v2.bed.gz">s3://strconstraint/Gymrek_etal_SupplementalData1_v2.bed.gz</a></li>
+  <li>eSTR data is based on <a href="https://drive.google.com/file/d/1eJ9Ae-4RO7kcCETmev31u3HQKCz4BpnL/view?usp=sharing">Supplementary Dataset 1</a> of Fotsing et al.</li>
+  <li>Full eSTR summary statistic data: <a href="https://drive.google.com/file/d/1iqgSWJZbylVbonQ5EfWYLCn9V1CLgX5h/view?usp=sharing">eSTRGtex_DatasetS2.tar.gz</a></li>
+  <li>Per-locus selection metrics computed by SISTR:<a href="https://drive.google.com/file/d/1wo1oH7Gv8mEjCx1fbHglPJ1HChoJa89b/view?usp=sharing">SISTR results.txt</a> Read me: <a href="https://drive.google.com/file/d/1cu8Wlou9fkDXJkhfrx5TVZ1xCB6Cuq3W/view?usp=sharing">README.txt</a></li>
+</ul>
+
+ <h1>Downloads previously available on strcat.teamerlich.org</h1>
+<ul>
+<li> 1000 Genomes Project Phase 1 calls (<a href="https://www.ncbi.nlm.nih.gov/pubmed/25135957">Willems et al 2014)
+<ul>
+<li><a href="https://drive.google.com/open?id=1tIat-ExcyfZN1PTInC_TCkc_CUSzJQAQ"> phase_1_final_calls.vcf.gz</a></li></li>
+<li><a href="https://drive.google.com/open?id=1FjSAG5qUrErROzmVPyu8ZMyzjcaZMOQd">hg19_ref.tar.gz</a></li>
+<li><a href="https://drive.google.com/open?id=1daQWWiRI-QZY0kvubPhS-46ORhgV7ZFZ">expanded_hg19_ref.tar.gz</a></li>
+</ul>
+</li>
+
+<li>LobSTR calls on the Simons Genome Diversity Project (SGDP) (<a href="https://www.ncbi.nlm.nih.gov/pubmed/27654912">Mallick et al 2016</a> and <a href="https://www.ncbi.nlm.nih.gov/pubmed/28892063">Gymrek et al 2017</a>)
+<ul>
+{% for loopcnt in range(1,22) %}
+{% if loopcnt == 21 %}
+<li>SGDP chr21 [<a href=http://bit.ly/SGDP21-CHR-21 >VCF</a>]
+[<a href=http://bit.ly/SGDP-CHR-21-idx >index</a>] </li>
+{% else %}
+<li>SGDP chr{{ loopcnt }} [<a href=http://bit.ly/SGDP-CHR-{{ loopcnt }} >VCF</a>]
+[<a href=http://bit.ly/SGDP-CHR-{{ loopcnt }}-idx >index</a>] </li>
+{% endif %}
+{% endfor %}
+<li>SGDP chrX [<a href=http://bit.ly/SGDP-CHR-X >VCF</a>] [<a href=http://bit.ly/SGDP-CHR-X-idx >index</a>] </li>
+<li>SGDP chrY [<a href=http://bit.ly/SGDP-CHR-Y >VCF</a>] [<a href=http://bit.ly/SGDP-CHR-Y-idx >index</a>] </li>
+</li>
+</ul>
+<li>splice STR bed <a href="https://drive.google.com/open?id=1Q51caDrDmifdBoUDZQqvqLPXYxW5SCw9">potential_spliceSTRs.bed.gz</a></li>
+</ul>
+
+</div>
+    </div>
+{% endblock %}
+
