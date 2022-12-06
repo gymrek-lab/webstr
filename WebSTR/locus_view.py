@@ -7,7 +7,7 @@ import numpy as np
 seqbuf = 120
 seqbreakline = 100
 API_URL = 'https://str-explorer.herokuapp.com'
-API_URL = 'http://0.0.0.0:5000'
+#API_URL = 'http://0.0.0.0:5000'
 
 def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
     ret = '<font size="3" color="black">...'
