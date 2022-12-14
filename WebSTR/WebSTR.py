@@ -21,7 +21,7 @@ from region_view import *
 
 #################### Database paths ###############
 PLATFORM = "snorlax" # or AWS
-BASEPATH =  "../data/"
+BASEPATH =  os.environ['DATAPATH']
 if PLATFORM == "snorlax":
     #BasePath = "/storage/resources/dbase/dbSTR/SS1/" # TODO this is allele freq. not used now
     #DbSTRPath = "/storage/resources/dbase/dbSTR/"
@@ -158,7 +158,9 @@ def locusview():
         print("locus view hg38")
         reffa = pyfaidx.Fasta(RefFaPath_hg38)
         chrom, start, end, seq, gene_name, gene_desc, motif, copies, crc_data = GetSTRInfoAPI(str_query, reffa)
+        print("Getting allele freqs")
         freq_dist = GetFreqSTRInfoAPI(str_query)
+        print(freq_dist)
         if len(freq_dist) > 0:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
         
