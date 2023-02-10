@@ -6,8 +6,8 @@ WebSTR database (hg19) and web application code
 ### Set up python3 and virtualenv on your machine:
 [For Mac, follow instructions here.](https://gist.github.com/pandafulmanda/730a9355e088a9970b18275cb9eadef3)
 
-### Create new virtual env and install all the requirements with the following command:
-`pip3 install -r requirements.txt`
+### Create new virtual env with python3 and install all the requirements with the following command:
+`pip install -r requirements.txt`
 
 ### Copy data files to data directory
 
@@ -20,6 +20,7 @@ You will need:
 
 To run for testing and development:
 ```
+export DATAPATH=*full data directory path*
 python ./WebSTR/WebSTR.py --host 0.0.0.0 --port <port>
 ```
 
