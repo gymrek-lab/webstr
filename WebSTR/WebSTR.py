@@ -161,7 +161,7 @@ def locusview():
         print("Getting allele freqs")
         freq_dist = GetFreqSTRInfoAPI(str_query)
         print(freq_dist)
-        if len(freq_dist) > 0:
+        if freq_dist:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
         
     if len(mut_data) != 1: mut_data = None

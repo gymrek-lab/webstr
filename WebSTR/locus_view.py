@@ -6,7 +6,7 @@ import numpy as np
 
 seqbuf = 120
 seqbreakline = 100
-API_URL = 'https://str-explorer.herokuapp.com'
+API_URL = 'http://webstr-api.ucsd.edu/'
 #API_URL = 'http://0.0.0.0:5000'
 
 def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
@@ -127,19 +127,25 @@ def GetFreqSTRInfoAPI(repeat_id):
     print("calling api with " + repeat_url)
     
     resp = requests.get(repeat_url)
+    print(resp.text)
     df = pd.DataFrame.from_records(json.loads(resp.text))
-    df["percentage"] = df["frequency"] * 100
-    df["copies"] = df["n_effective"]
-    grouped_df = df[["population", "copies", "percentage"]].groupby(by="population")
-    
-    for key, item in grouped_df:
-        print(grouped_df.get_group(key), "\n\n")
 
-    print("API, allele freqs: ")
-    print(grouped_df)
+    if not df.empty:
+        df["percentage"] = df["frequency"] * 100
+        df["copies"] = df["n_effective"]
+        grouped_df = df[["population", "copies", "percentage"]].groupby(by="population")
+    
+        for key, item in grouped_df:
+            print(grouped_df.get_group(key), "\n\n")
+
+        print("API, allele freqs: ")
+        print(grouped_df)
+        return grouped_df
+    else:
+        return None
     #print(pd.DataFrame(np.array(grouped_df).reshape(-1,5), columns = list("abcdf")))
 
-    return grouped_df
+    #return grouped_df
 
 def GetImputationAlleleInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()

@@ -13,7 +13,7 @@ GENEBUFFER = 0.1
 EXON_WIDTH = 0.3
 GENE_WIDTH = 0.03
 GENE_COLOR = "black"
-API_URL = 'https://str-explorer.herokuapp.com'
+API_URL = 'http://webstr-api.ucsd.edu/'
 #API_URL = 'http://0.0.0.0:5000'
 
 def GetRegionData(region_query, DbSTRPath):
