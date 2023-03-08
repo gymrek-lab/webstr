@@ -41,9 +41,10 @@ def GetSTRInfo(strid, DbSTRPath, reffa):
     end = int(df[0][2])
     motif = df[0][3]
     copies = df[0][4]
-
+    print(GetSTRInfo)
     lflank = str(reffa[chrom][start-seqbuf:start]).upper()
     strseq = str(reffa[chrom][start:end]).upper()
+    print(strseq)
     rflank = str(reffa[chrom][end:end+seqbuf]).upper()
     seq = GetSTRSeqHTML(lflank,strseq,rflank)
     return chrom, start, end, motif, copies, seq
@@ -73,7 +74,7 @@ def GetSTRInfoAPI(repeat_id, reffa):
 
 
     lflank = str(reffa[chrom][start-seqbuf:start]).upper()
-    strseq = str(reffa[chrom][start:end]).upper()
+    strseq = str(reffa[chrom][start-1:end]).upper()
     rflank = str(reffa[chrom][end:end+seqbuf]).upper()
     seq = GetSTRSeqHTML(lflank,strseq,rflank)
     print(seq)
