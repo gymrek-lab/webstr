@@ -22,12 +22,19 @@
 
 
   myPlot.on('plotly_click', function(data){
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const genome = urlParams.get('genome');
     for(var i=0; i < data.points.length; i++){
         if (data.points[i].curveNumber==1) {
           url="None";
         }
         else {
-          url="/locus?STRID="+strids[data.points[i].pointNumber]
+          if (genome == 'hg19')  {
+            url="/locus?repeat_id="+strids[data.points[i].pointNumber]
+         } else {
+            url="/locus?repeat_id="+strids[data.points[i].pointNumber]+'&genome=hg38'
+         }
         }
     }
     if (url != "None") {

@@ -245,20 +245,22 @@ def GetHCalc(strid,DbSTRPath):
 
 
 def GetColor(period):
-    colors = ["gray","red","gold","blue","purple","green"]
+    colors = ["gray","red","gold","blue","purple","green","magenta", "pink", "yellow"]
     return colors[int(period)-1]
 
 def GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes):
     # get gene_start and gene_end for hg 38
     print("GetGenePlotlyJSON")
-    print(region_data)
+
     # Draw gene info
     #if len(region_data.index) != 0:
     region_data2 = region_data
     
     #chrom = region_data2["chrom"].values[0].replace("chr","")
     chr = region_data2["chr"].values[0].replace("chr","")
-    print(region_data2)
+    
+    print("Get points for each STR")
+
     # Get points for each STR
     trace1 = go.Scatter(
         x = (region_data2["start"]+region_data2["end"])/2,

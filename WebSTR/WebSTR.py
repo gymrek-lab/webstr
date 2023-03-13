@@ -111,6 +111,8 @@ def search():
         if region_data_hg38.shape[0] > 0:
             gene_trace_hg38, gene_shapes_hg38, numgenes_hg38, min_gene_start_hg38, max_gene_end_hg38 = GetGeneGraph(region_query)
             plotly_plot_json_hg38, plotly_layout_json_hg38 = GetGenePlotlyJSON(region_data_hg38, gene_trace_hg38, gene_shapes_hg38, numgenes_hg38)
+            print("Got results")
+            print("About to render templates")
             print(region_data_hg38.to_records(index=False))
             return render_template('view2.html',
                                     table = region_data_hg38.to_records(index=False),
