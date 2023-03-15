@@ -28,8 +28,8 @@ if PLATFORM == "snorlax":
     #DbSTRPath = "/storage/resources/dbase/dbSTR/"
     #RefFaPath_hg19 = "/storage/resources/dbase/human/hg19/hg19.fa"
     DbSTRPath = BASEPATH
-    RefFaPath_hg19 = BASEPATH + "hg19.fa"
-    RefFaPath_hg38 = BASEPATH + "hg38.fa"
+    RefFaPath_hg19 = BASEPATH + "hg19/hg19.fa"
+    RefFaPath_hg38 = BASEPATH + "hg38/hg38.fa"
 elif PLATFORM == "AWS":
     #BasePath = ""
     DbSTRPath = ""
