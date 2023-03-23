@@ -1,159 +1,208 @@
 {% extends "layout.html" %}
 {% block body %}
-    <div class="container">
-      <div class="row" style="font-size: 18px;">
-	
+
+<div class="container">
+	<div class="row mt-5">
+	  <div class="col-sm">
 		<h1>About WebSTR</h1>
-	
-      </div>
-        <div class="row" style="font-size: 16px;">
-			<p>
-			<ul>
-				<li><a href="#start">Getting started</a></li>
-				<li><a href="#datasets">Datasets</a></li>
-				<li><a href="#ack">Shoutouts</a></li>
-			  </ul>
-			</p>
-            <div>
-	      <a name="start"></a>
-	      <h2>Getting started</h2>
-
-	      <h4>1. Searching for STRs</h4>
-	      <p>
-		
-			To get started, from the <a href="/">WebSTR homepage</a>, 
-		pick a genome assembly version in the dropdown. WebSTR currently stores some datasets that are only
-		mapped to the hg19/GRCh37 coordinates. The default value is hg38 and corresponds to Ensembl version GRCh38.p2.
-		
-		
-		You can search for STRs by entering one of the following into the search bar:
-		<ul>
-		  <li>A gene name (e.g., <em><a href="/search?query=PCSK9&genome=hg38">PCSK9</a></em> or <em><a href="/search?query=RFT1&genome=hg38">RFT1</a></em>)</li>
-		  <li>An Ensembl identifier (e.g., <a href="/search?query=ENSG00000169174&genome=hg38">ENSG00000169174</a> or <a href="/search?query=ENSG00000163933&genome=hg38">ENSG00000163933</a>)</li>
-		  <li>A genomic region using the syntax chrom:start-end (e.g., <a href="/search?query=22:46615715-46625880&genome=hg38">22:46615715-46625880</a>).</li>
-		</ul>
-		
-		If you enter a gene name/id that is invalid or cannot be found, an invalid genomic region, or a genomic region spanning more than 1 Mb, you will receive an error message.
-	      </p>
-	      
-	      <h4>2. Region pages</h4>
-	      <p>
-		A valid search will take you to a region-level page. The top of this page displays the exon/intron structure of genes in the region. Arrows next to the gene names represent the template strand of the gene. Each dot represents an STR in the region, color-coded by the motif length (gray=homopolymer, red=dinucleotide, gold=trinucleotide, blue=tetranucleotide, green=pentanucleotide, and purple=hexanucleotide). Hovering over an STR will display the coordinates and motif. Clicking an STR will take you to the STR page for that locus.
-	      </p>
-	      <p>
-		The bottom of the page displays a table of all STRs identified in the region. It includes the coordinates, motif sequence, and length of the repeat in the reference genome.
-	      </p>
-	      
-	      <h4>3. STR pages</h4>
-	      <p>
-		STR pages (e.g. <a href="/locus?STRID=STR_941272">see example</a>) provide locus-level information gathered from various genome-wide studies. By default, the sequence of the STR (red) and its genomic context (black, +/- 120bp) are shown. Other data panels (Expression STRs, Mutation and constraint, and STR imputation) can be displayed or hidden by clicking on the respective black title boxes. These panels are described below.
-	      </p>
-	      
-
-	      <a name="datasets"></a>
-	      <h2>STR datasets</h2>
-	      
-	      STR pages feature datasets from the following studies:
-		  <br><br>
-		  <h4> EnsembleTR (To be published) </h4>
-		  <p>Lorem ipsum dolor</p>
-		  <h4> Sinergia-CRC (TCGA cohort) (To be published) </h4>
-		  <p> For this reference panel we used statistical framework TRAL to find STRs in the human reference genome. 
-			The Sinergia-CRC repeats have been genotyped using GangSTR on more than 400 genomes from patients with 
-			colorectal cancer available to us through the TCGA consortium. This project is part of a larger effort 
-			<a href="https://www.zhaw.ch/en/research/research-database/project-detailview/projektid/4244/">
-			"Trans-omic approach to colorectal cancer: an integrative computational and clinical perspective"
-		     </a> funded by a <a href="https://www.snf.ch/en/HzVMPWm96mz69ZJ8/funding/programmes/sinergia"></a> SNSF Sinergia grant.</a>
- 		</p>
-	      <br><br>
-		  <h3> Earlier studies (mapped to hg19) </h3>
-	      <h4><u>1. Expression STRs (eSTRs) (<a href="https://www.biorxiv.org/content/early/2018/12/13/495226">Fotsing <em>et al.</em> 2018</a>)</u></h4>
-	      <p>
-	      In this study we analyzed STRs in whole genome sequencing data from the <a href="gtexportal.org">Genotype Tissue Expression (GTEx) Project</a> for 650 individuals and gene expression across 17 tissues to detect STRs whose lengths are correlated with expression of nearby genes (termed "eSTRs"). We further used CAVIAR to fine-map associations for individual genes against nearby SNPs to identify eSTRs most likely acting as causal variants. The figure below shows a schematic of the study design.
-	      </p>
-	      <center>
-		<img src="/static/images/WebSTR_eSTR.jpg" width="80%"> 
-	      </center>
-	      <p>
-		For each STR, all significant eSTRs (per-tissue gene-level FDR of 10%) are shown. The following statistics are given for each eSTR association:
-		<ul>
-		  <li><b>Gene (ENS):</b> gives the gene name and Ensembl ID of the gene which the STR is associated with</li>
-		  <li><b>Tissue</b>: the tissue where the association was identified. If a given eSTR was detected in multiple tissues, each tissue is shown on a separate line.</li>
-		  <li><b>Beta</b>: the regression coefficient obtained by regression normalized gene expression values on normalized STR length. Positive beta values indicate longer STR lengths are associated with higher gene expression, and vice versa. Beta squared can be interpreted as the percentage of variance in gene expression explained by STR length.</li>
-		  <li><b>P-value</b>: the p-value for the regression analysis, testing the null hypothesis that beta is equal to 0.</li>
-		  <li><b>CAVIAR</b>: posterior probability of causality obtained by performing CAVIAR fine-mapping analysis against the top 100 nearby SNPs.
-		</ul>
-		In some cases, certain STRs either weren't analyzed or did not have any significant eSTRs, in which case no data is shown.
-		Full details of eSTR analyses can be found in <a href="https://www.biorxiv.org/content/early/2018/12/13/495226">Fotsing <em>et al.</em></a>
-	      </p>
-
-	      <br>
-	      <h4><u>2. STR mutation rates and constraint (<a href="https://www.ncbi.nlm.nih.gov/pubmed/28892063">Gymrek <em>et al.</em> 2017</a>)</u></h4>
-	      <p>
-	      In this study we formulated a novel STR mutation model based on a mean-centered random walk and used this model to estimate key parameters of STR mutation at individual loci. We then used this model to compute per-STR estimates of mutational constraint by comparing observed to expected mutation rates at each STR. These constraint metrics can be used to prioritize potentially pathogenic variants. For example, mutations at highly constrained STRs (way lower observed mutation rate than expected) may be indicative of a pathogenic mutation.
-	      </p>
-	      <center>
-		<img src="/static/images/WebSTR_Constraint.jpg" width="50%"> 
-	      </center>
-	      <p>
-		The following data is shown for each STR. Notably, constraint scores were only computed for STRs with motif lengths 2 and 4, and some loci for which optimization of our likelihood model failed no mutation information is available.
-		<ul>
-		  <li>
-		    <b>Mutation model estimates:</b>
-		    <ul>
-		      <li><b>Mutation rate</b>: per-locus per-generation probability of mutation</li>
-		      <li><b>Beta</b>: Length constraint parameter (between 0 and 1; note different than the beta above for eSTRs). In general, short alleles are more likely to mutate to long alleles and vice versa. A beta value of 0 indicates no directional bias, whereas a value closer to 1 indicates a strong directional bias.</li>
-		      <li><b>P(single step)</b>: The probability that a mutation at this locus results in a length change of single repeat unit (as opposed to insertions or deletions of multiple copies of the repeat unit)</li>
-		    </ul>
-		  </li>
-		  <li><b>Constraint</b>: Z-score describing STR constraint. Negative values indicate strong constraint (lower mutation rates than expected). Positive values indicate hypermutable loci. Values near 0 indicate loci with mutation rates close to expected.</li>
-		  <li>
-		    <b>Stutter noise parameters</b>: describe parameters of the stutter noise model at each STR inferred from PCR-free WGS.
-		    <ul>
-		      <li><b>Up</b>: probability that a stutter error results in an increase in repeat length</li>
-		      <li><b>Down</b>: probability that a stutter error results in a decrease in repeat length</li>
-		      <li><b>P</b>: probability that the size of a stutter error is a single repeat unit</li>
-		    </ul>
-		  </li>
-		</ul>
-		Full details are available in <a href="https://www.ncbi.nlm.nih.gov/pubmed/28892063">Gymrek <em>et al.</em> 2017</a>.
-	      </p>
-	      <br><br>
-	      <h4><u>3. Imputation statistics (<a href="https://www.nature.com/articles/s41467-018-06694-0">Saini <em>et al.</em> 2018</a>)</u></h4>
-	      <p>
-		We generated a reference haplotype panel for imputing STR genotypes into SNP genotypes (either from WGS or from SNP arrays). The panel is based on WGS for quad families from the <a href="https://www.sfari.org/resource/simons-simplex-collection/">Simons Simplex Collection</a>, which consists of individuals from various ancestry groups but is majority European and thus will have better performance for similar ancestry cohorts.
-	      </p>
-	      <center>
-		<img src="/static/images/WebSTR_imputation.jpg" width="30%"> 
-	      </center>
-	      <p>
-		When available, the imputation metrics described below are available for each STR. These metrics give an overall picture of how well imputation of each STR will work across various ancestry groups.
-
-		<br><br>
-		<b>Locus-level imputation metrics</b>:
-		At each STR, we evaluated imputation performance by comparing genotypes obtained by HipSTR directly from WGS data vs. those obtained by imputation using our panel. Statistics shown are based on two types of evaluations. First, we performed a within-sample leave one out analysis (labeled as SSC). Second, we compared imputed vs. HipSTR genotypes in an orthogonal set of samples than those used to generate the panel (1000 Genomes, European, African, and East Asian cohorts). For each analysis, the following statistics are given:
-		<ul>
-		  <li><b>Concordance</b>: the percentage of genotypes matching between those obtained directly by HipSTR vs. from imputation</li>
-		  <li><b>r</b>: Pearson correlation between STR lengths obtained by HipSTR vs. by imputation.</li>
-		</ul>
-		<b>Allele-level imputation metrics</b>:
-		We additionally evaluated imputation performance by considering each STR allele length as a separate bi-allelic variant. The following statistics are shown, based on the within-sample leave one out analysis in SSC:
-		<ul>
-		  <li><b>Allele</b>: length of the STR allele, given in bp length difference from hg19</li>
-		  <li><b>r2</b>: Pearson r2 between HipSTR vs. imputed genotypes.</li>
-		  <li><b>P-val</b>: P-value testing the null hypothesis that the r2 value is 0</li>
-		</ul>
-		Full details are available in <a href="https://www.nature.com/articles/s41467-018-06694-0">Saini <em>et al.</em> 2018</a> and the haplotype reference panel based on 1000 Genomes samples is available <a href="https://gymreklab.github.io/2018/03/05/snpstr_imputation.html">here</a>.
-	      </p>
-	      
-	      <a name="ack"></a>
-	      <h2>Shoutouts</h2>
-	      
-	      WebSTR was developed by Richard Yanicky and Melissa Gymrek with input from other <a href="http://gymreklab.com/people.html">Gymrek Lab members</a>. It is heavily based on and inspired by the Exome Aggregation Database (<a hredf="http://www.exac.broadinstitute.org">ExAC</a>). Gene plots were generated using <a href="https://plot.ly/">plotly</a>.
-	      
-	      WebSTR development was supported in part by the Office Of The Director, National Institutes of Health under Award Number DP5OD024577 and by SFARI Explorer Award Number 515568.
-	      <br><br><br><br>
-	    </div>
+	  </div>
 	</div>
-    </div>
+
+
+	<div class="row mt-3">
+		<div class="col-sm">
+			<div class="btn-group" role="group" aria-label="Basic example">
+				<a href="#start"><button type="button" class="btn btn-secondary mr-1" >Getting started</button></a>
+				<a href="#datasets"><button type="button" class="btn btn-secondary mr-1">Datasets</button></a>
+				<a href="#api"><button type="button" class="btn btn-secondary mr-1">Programmatic access</button></a>
+				<a href="#ack"><button type="button" class="btn btn-secondary">Shoutouts</button></a>
+			  </div>
+		</div>
+	  </div>
+
+	
+	
+	  <div class="row mt-3">
+		<div class="col-sm">
+			<a name="start"></a>
+			<h2>Getting started</h2>
+			<p><h4>1. Searching for STRs</h4></p>
+			<p>
+		
+				To get started, from the <a href="/">WebSTR homepage</a>, 
+			pick a genome assembly version in the dropdown. WebSTR currently stores some datasets that are only
+			mapped to the hg19/GRCh37 coordinates. The default value is hg38 and corresponds to Ensembl version GRCh38.p2.
+			
+			
+			You can search for STRs by entering one of the following into the search bar:
+			<ul>
+			  <li>A gene name (e.g., <em><a href="/search?query=PCSK9&genome=hg38">PCSK9</a></em> or <em><a href="/search?query=RFT1&genome=hg38">RFT1</a></em>)</li>
+			  <li>An Ensembl identifier (e.g., <a href="/search?query=ENSG00000169174&genome=hg38">ENSG00000169174</a> or <a href="/search?query=ENSG00000163933&genome=hg19">ENSG00000163933</a>)</li>
+			  <li>A genomic region using the syntax chrom:start-end (e.g., <a href="/search?query=22:46615715-46625880&genome=hg19">22:46615715-46625880</a>).</li>
+			</ul>
+			
+			If you enter a gene name/id that is invalid or cannot be found, an invalid genomic region, or a genomic region spanning more than 1 Mb, you will receive an error message.
+			  </p>
+			  
+			  <p><h4>2. Region pages</h4></p>
+			  <p>
+			A valid search will take you to a region-level page. The top of this page displays the exon/intron structure of genes in the region. Arrows next to the gene names represent the template strand of the gene. Each dot represents an STR in the region, color-coded by the motif length (gray=homopolymer, red=dinucleotide, gold=trinucleotide, blue=tetranucleotide, green=pentanucleotide, and purple=hexanucleotide). Hovering over an STR will display the coordinates and motif. Clicking an STR will take you to the STR page for that locus.
+			  </p>
+			  <p>
+			The bottom of the page displays a table of all STRs identified in the region. It includes the coordinates, motif sequence, and length of the repeat in the reference genome.
+			  </p>
+			  
+			  <p>
+				<h4>3. STR pages</h4></p>
+			  <p>
+			STR pages (e.g. <a href="/locus?repeat_id=STR_941272">see example</a>) provide locus-level information gathered from various genome-wide studies. By default, the sequence of the STR (red) and its genomic context (black, +/- 120bp) are shown. Other data panels (Expression STRs, Mutation and constraint, and STR imputation) can be displayed or hidden by clicking on the respective black title boxes. These panels are described below.
+			  </p>
+			  
+		</div>
+	  </div>
+
+	  <div class="row mt-5">
+		<div class="col-sm">
+			<a name="datasets"></a>
+			<p>
+				<h2>Available datasets</h2>
+			</p>
+			<p>
+			STR pages feature datasets from the following studies:
+			</p>
+			<p>
+			<h4> EnsembleTR (<a href="https://www.biorxiv.org/content/10.1101/2023.03.09.531600v1">Zam <em>et al.</em>2023</a>) </h4>
+			</p>
+			<p>This STR reference panel is based on the GRCh38 reference assembly and contains 1.7 million unique autosomal STRs based on a
+			   combined set of TRs genotyped by four separate methods (HipSTR, GangSTR, ExpansionHunter, and AdVNTR) on the 1000 Genomes Project 
+			  and H3Africa data.
+			</p>
+  
+  
+			<h4> Sinergia-CRC (TCGA cohort) (Manuscript in preparation) </h4>
+  
+			<p> For this reference panel we used statistical framework TRAL to find STRs in the human reference genome. 
+			  The Sinergia-CRC repeats have been genotyped using GangSTR on more than 400 genomes from patients with 
+			  colorectal cancer available to us through the TCGA consortium. This project is part of a larger effort 
+			  <a href="https://www.zhaw.ch/en/research/research-database/project-detailview/projektid/4244/">
+			  "Trans-omic approach to colorectal cancer: an integrative computational and clinical perspective"
+			   </a> funded by a <a href="https://www.snf.ch/en/HzVMPWm96mz69ZJ8/funding/programmes/sinergia"></a> SNSF Sinergia grant.</a>
+		   </p>
+			<br><br>
+			<h3> Earlier studies (mapped to hg19) </h3>
+			<h4><u>1. Expression STRs (eSTRs) (<a href="https://www.biorxiv.org/content/early/2018/12/13/495226">Fotsing <em>et al.</em> 2018</a>)</u></h4>
+			<p>
+			In this study we analyzed STRs in whole genome sequencing data from the <a href="gtexportal.org">Genotype Tissue Expression (GTEx) Project</a> for 650 individuals and gene expression across 17 tissues to detect STRs whose lengths are correlated with expression of nearby genes (termed "eSTRs"). We further used CAVIAR to fine-map associations for individual genes against nearby SNPs to identify eSTRs most likely acting as causal variants. The figure below shows a schematic of the study design.
+			</p>
+			<center>
+		  <img src="/static/images/WebSTR_eSTR.jpg" width="80%"> 
+			</center>
+			<p>
+		  For each STR, all significant eSTRs (per-tissue gene-level FDR of 10%) are shown. The following statistics are given for each eSTR association:
+		  <ul>
+			<li><b>Gene (ENS):</b> gives the gene name and Ensembl ID of the gene which the STR is associated with</li>
+			<li><b>Tissue</b>: the tissue where the association was identified. If a given eSTR was detected in multiple tissues, each tissue is shown on a separate line.</li>
+			<li><b>Beta</b>: the regression coefficient obtained by regression normalized gene expression values on normalized STR length. Positive beta values indicate longer STR lengths are associated with higher gene expression, and vice versa. Beta squared can be interpreted as the percentage of variance in gene expression explained by STR length.</li>
+			<li><b>P-value</b>: the p-value for the regression analysis, testing the null hypothesis that beta is equal to 0.</li>
+			<li><b>CAVIAR</b>: posterior probability of causality obtained by performing CAVIAR fine-mapping analysis against the top 100 nearby SNPs.
+		  </ul>
+		  In some cases, certain STRs either weren't analyzed or did not have any significant eSTRs, in which case no data is shown.
+		  Full details of eSTR analyses can be found in <a href="https://www.biorxiv.org/content/early/2018/12/13/495226">Fotsing <em>et al.</em></a>
+			</p>
+  
+			<br>
+			<h4><u>2. STR mutation rates and constraint (<a href="https://www.ncbi.nlm.nih.gov/pubmed/28892063">Gymrek <em>et al.</em> 2017</a>)</u></h4>
+			<p>
+			In this study we formulated a novel STR mutation model based on a mean-centered random walk and used this model to estimate key parameters of STR mutation at individual loci. We then used this model to compute per-STR estimates of mutational constraint by comparing observed to expected mutation rates at each STR. These constraint metrics can be used to prioritize potentially pathogenic variants. For example, mutations at highly constrained STRs (way lower observed mutation rate than expected) may be indicative of a pathogenic mutation.
+			</p>
+			<center>
+		  <img src="/static/images/WebSTR_Constraint.jpg" width="50%"> 
+			</center>
+			<p>
+		  The following data is shown for each STR. Notably, constraint scores were only computed for STRs with motif lengths 2 and 4, and some loci for which optimization of our likelihood model failed no mutation information is available.
+		  <ul>
+			<li>
+			  <b>Mutation model estimates:</b>
+			  <ul>
+				<li><b>Mutation rate</b>: per-locus per-generation probability of mutation</li>
+				<li><b>Beta</b>: Length constraint parameter (between 0 and 1; note different than the beta above for eSTRs). In general, short alleles are more likely to mutate to long alleles and vice versa. A beta value of 0 indicates no directional bias, whereas a value closer to 1 indicates a strong directional bias.</li>
+				<li><b>P(single step)</b>: The probability that a mutation at this locus results in a length change of single repeat unit (as opposed to insertions or deletions of multiple copies of the repeat unit)</li>
+			  </ul>
+			</li>
+			<li><b>Constraint</b>: Z-score describing STR constraint. Negative values indicate strong constraint (lower mutation rates than expected). Positive values indicate hypermutable loci. Values near 0 indicate loci with mutation rates close to expected.</li>
+			<li>
+			  <b>Stutter noise parameters</b>: describe parameters of the stutter noise model at each STR inferred from PCR-free WGS.
+			  <ul>
+				<li><b>Up</b>: probability that a stutter error results in an increase in repeat length</li>
+				<li><b>Down</b>: probability that a stutter error results in a decrease in repeat length</li>
+				<li><b>P</b>: probability that the size of a stutter error is a single repeat unit</li>
+			  </ul>
+			</li>
+		  </ul>
+		  Full details are available in <a href="https://www.ncbi.nlm.nih.gov/pubmed/28892063">Gymrek <em>et al.</em> 2017</a>.
+			</p>
+			<br><br>
+			<h4><u>3. Imputation statistics (<a href="https://www.nature.com/articles/s41467-018-06694-0">Saini <em>et al.</em> 2018</a>)</u></h4>
+			<p>
+		  We generated a reference haplotype panel for imputing STR genotypes into SNP genotypes (either from WGS or from SNP arrays). The panel is based on WGS for quad families from the <a href="https://www.sfari.org/resource/simons-simplex-collection/">Simons Simplex Collection</a>, which consists of individuals from various ancestry groups but is majority European and thus will have better performance for similar ancestry cohorts.
+			</p>
+			<center>
+		  <img src="/static/images/WebSTR_imputation.jpg" width="30%"> 
+			</center>
+			<p>
+		  When available, the imputation metrics described below are available for each STR. These metrics give an overall picture of how well imputation of each STR will work across various ancestry groups.
+  
+		  <br><br>
+		  <b>Locus-level imputation metrics</b>:
+		  At each STR, we evaluated imputation performance by comparing genotypes obtained by HipSTR directly from WGS data vs. those obtained by imputation using our panel. Statistics shown are based on two types of evaluations. First, we performed a within-sample leave one out analysis (labeled as SSC). Second, we compared imputed vs. HipSTR genotypes in an orthogonal set of samples than those used to generate the panel (1000 Genomes, European, African, and East Asian cohorts). For each analysis, the following statistics are given:
+		  <ul>
+			<li><b>Concordance</b>: the percentage of genotypes matching between those obtained directly by HipSTR vs. from imputation</li>
+			<li><b>r</b>: Pearson correlation between STR lengths obtained by HipSTR vs. by imputation.</li>
+		  </ul>
+		  <b>Allele-level imputation metrics</b>:
+		  We additionally evaluated imputation performance by considering each STR allele length as a separate bi-allelic variant. The following statistics are shown, based on the within-sample leave one out analysis in SSC:
+		  <ul>
+			<li><b>Allele</b>: length of the STR allele, given in bp length difference from hg19</li>
+			<li><b>r2</b>: Pearson r2 between HipSTR vs. imputed genotypes.</li>
+			<li><b>P-val</b>: P-value testing the null hypothesis that the r2 value is 0</li>
+		  </ul>
+		  Full details are available in <a href="https://www.nature.com/articles/s41467-018-06694-0">Saini <em>et al.</em> 2018</a> and the haplotype reference panel based on 1000 Genomes samples is available <a href="https://gymreklab.github.io/2018/03/05/snpstr_imputation.html">here</a>.
+			</p>
+		</div>
+	  </div>
+
+	  <div class="row mt-3">
+		<div class="col-sm">
+			<a name="api"></a>
+			<h2>Programmatic access - WebSTR API</h2>
+			<p>
+				We provide programmatic assess to the data using a RESTful API, documentation on available endpoints with code examples is available 
+				on the main page: <a href="http://webstr-api.ucsd.edu/docs">http://webstr-api.ucsd.edu/docs</a>
+			</p>
+		</div>
+	  </div>
+
+	  <div class="row mt-5">
+		<div class="col-sm">
+			<a name="ack"></a>
+			<h2>Shoutouts</h2>
+			<p>
+			First version of WebSTR was made by Richard Yanicky and Melissa Gymrek with input from other 
+			<a href="http://gymreklab.com/people.html">Gymrek Lab members</a>. It was originally inspired by
+			 the Exome Aggregation Database (<a href="http://www.exac.broadinstitute.org">ExAC</a>).
+			 Current version of the website, database and the API is developed in collaboration with <a href="https://github.com/acg-team">Maria Anisimova's Lab.</a>
+			</p>
+			<p>
+				This collaboration project was supported by the SNSF Sinergia grant CRSII5_193832 and the EU Horizon 2020 research and 
+				innovation program under the Marie Skłodowska-Curie grant agreement No. 823886. 
+				Development of the first version of WebSTR was supported in part by the Office Of The Director, 
+				National Institutes of Health under Award Number DP5OD024577 and by SFARI Explorer Award Number 515568.
+				
+				Hosting, maintenance and development of WebSTR is partially funded by the  NIH/NHGRI grant R01HG010885. 	
+		</p><br><br><br><br>
+		</div>
+	  </div>
+
+	</div>
+
 {% endblock %}

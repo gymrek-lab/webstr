@@ -1,16 +1,19 @@
 {% extends "layout.html" %}
 {% block body %}
-    <div class="container">
-        <div class="row" style="font-size: 16px;">
-	  <h2>Data usage</h2>
+<div class="container">
+	<div class="row mt-5">
+	  <div class="col-sm">
+        <h1>Data usage</h1>
+        <p>All data provided through WebSTR comes from previously published sources and is freely available.
+            You can access data via the <a href="/download">Downloads</a> and <a href="http://webstr-api.ucsd.edu/docs">WebSTR API</a>.
+        </p>
+        <h2>Citing WebSTR</h2>
 
-All data provided through WebSTR comes from previously published sources (see <a href="/download">downloads</a>) and is freely available.
-
-<h2>Citing WebSTR</h2>
-
-There is not yet any formal publication about WebSTR. For now, please acknowledge use of WebSTR using its URL.
-
+        <p>
+            There is not yet any formal publication about WebSTR. For now, please acknowledge use of WebSTR using its URL.
+        </p>
         </div>
-    </div>
+	  </div>
+	</div>
 
 {% endblock %}
