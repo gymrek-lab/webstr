@@ -1,7 +1,12 @@
-# webstr
-WebSTR database (hg19) and web application code
+# WebSTR web application (front-end)
 
-## Running the webserver
+This repository contains code and instructions for [WebSTR](http://webstr.ucsd.edu/) - web portal of Human genome-wide variation in Short Tandem Repeats (STRs). Our goal is to make large STR genotype datasets used by the broader genomics community by facilitating open access to this data.
+
+WebSTR is the result of collaboration between two scientific groups [Maria Anisimova’s Lab](https://github.com/acg-team) and [Melissa Gymrek’s Lab](https://github.com/gymrek-lab).
+
+Source code for the WebSTR-API can be found here: https://github.com/acg-team/webSTR-API
+
+## Instructions on how to set-up WebSTR web app locally (for development)
 
 ### Set up python3 and virtualenv on your machine:
 [For Mac, follow instructions here.](https://gist.github.com/pandafulmanda/730a9355e088a9970b18275cb9eadef3)
@@ -10,6 +15,8 @@ WebSTR database (hg19) and web application code
 `pip install -r requirements.txt`
 
 ### Copy data files to data directory
+
+We provide neccesssary data files upon request
 
 You will need:
 * dbSTR.db  (contains older panels mapped to hg19 assembly)
@@ -24,4 +31,4 @@ export DATAPATH=*full data directory path*
 python ./WebSTR/WebSTR.py --host 0.0.0.0 --port <port>
 ```
 
-For production mode, use a WSGI server like waitress or gunicorn. 
+For production mode, we use gunicorn + nginx. 
