@@ -1,6 +1,6 @@
-# WebSTR web application (front-end)
+# WebSTR web browser (front-end)
 
-This repository contains code and instructions for [WebSTR](http://webstr.ucsd.edu/) - web portal of Human genome-wide variation in Short Tandem Repeats (STRs). Our goal is to make large STR genotype datasets used by the broader genomics community by facilitating open access to this data.
+This repository contains code and instructions for [WebSTR](http://webstr.ucsd.edu/) - web browser of Human genome-wide variation in Short Tandem Repeats (STRs). Our goal is to make large STR genotype datasets used by the broader genomics community by facilitating open access to this data.
 
 WebSTR is the result of collaboration between two scientific groups [Maria Anisimova’s Lab](https://github.com/acg-team) and [Melissa Gymrek’s Lab](https://github.com/gymrek-lab).
 
@@ -32,3 +32,7 @@ python ./WebSTR/WebSTR.py --host 0.0.0.0 --port <port>
 ```
 
 For production mode, we use gunicorn + nginx. 
+
+### WebSTR Backend - database and API
+
+By default WebSTR will be using WebSTR-API hosted on our server. If you would like to set up the database and WebSTR backend as well (for example if you would like to make a new endpoint or add your own data to the database), please follow instructions to set up WebSTR database and API locally provided here [https://github.com/acg-team/webSTR-API](https://github.com/acg-team/webSTR-API). Proceed then to modify API_URL variable in WebSTR browser so the app communicates with your local instance of WebSTR-API. 
