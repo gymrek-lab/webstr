@@ -16,7 +16,7 @@ Source code for the WebSTR-API can be found here: https://github.com/acg-team/we
 
 ### Copy data files to data directory
 
-We provide neccesssary data files upon request
+We provide neccesssary data files upon request and currently working on incorporating them fully into the backend. 
 
 You will need:
 * dbSTR.db  (contains older panels mapped to hg19 assembly)
