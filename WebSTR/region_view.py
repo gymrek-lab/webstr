@@ -246,7 +246,11 @@ def GetHCalc(strid,DbSTRPath):
 
 def GetColor(period):
     colors = ["gray","red","gold","blue","purple","green","magenta", "pink", "yellow"]
-    return colors[int(period)-1]
+    color_index = int(period)-1
+    if color_index <= len(colors):
+        return colors[int(period)-1]
+    else:
+        return "black"
 
 def GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes):
     # get gene_start and gene_end for hg 38
