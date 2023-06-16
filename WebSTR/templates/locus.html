@@ -59,28 +59,25 @@ table.tables1 {
 		   {% endif %}
 		</div>   
       <!-- Div for the plotly chart -->
-        <button class="collapsible">Allele Frequency</button>
+	  {% if graphJSONx != {} %}
+        <button class="collapsible active">Allele Frequency</button>
 		<div class="content">
 	<div id="barchart" class="chart" ></div>
-	{% if graphJSONx == {} %}
-	<p> No data on allele frequencies in healthy genomes available. </p>
-	{% else %}
+
     <script type="text/javascript">
         var graphsx = {{graphJSONx | safe}};
         var graphslayoutx = {{graphlayoutx | safe}};
 		var barchart = document.getElementById('barchart');
         Plotly.newPlot(barchart,graphsx,graphslayoutx);
     </script>
-	{% endif %}
+
 </div>
+{% endif %}
      <br><br>
-	 <button class="collapsible">Variation in Colorectal Cancer (TCGA cohort)</button>
-      <div class="content  justify-content-center">
-         {% if crc_data == None %}
-          <p> No Data Available. </p>
-          {% else %}
-		  
-	<table border="1" cellpadding="5" cellspacing="5" class="tablesorter">
+	 {% if crc_data != None %}
+	 <button class="collapsible active">Variation in Colorectal Cancer (TCGA cohort)</button>
+      <div class="content  justify-content-center">	  
+	<table border="1" cellpadding="5" cellspacing="5" class="tablesorter " style="table-layout: fixed; width: 100%">
 	  <thead class="tablesorter-header"><th>Parameter</th><th>Value</th></thead>
 	  <tbody>
 	    <tr>
@@ -98,16 +95,13 @@ table.tables1 {
 	    
 	  </tbody>
 	</table>
-
-        {% endif %}
-		See the <a href="/about">about page</a> for detailed description of each parameter.
-	</div>
+		</div>
+		{% endif %}
 		<br><br>
+		{% if estr != None %}
       <button class="collapsible">Expression STRs</button>
       <div class="content">
-          {% if estr == None %}
-          <p> No eSTRs found. </p>
-          {% else %}
+         
 	<table class="tables1" border="1" cellpadding="4" cellspacing="4" style="table-layout: fixed; width: 100%">
          <colgroup>
              <col style="width: auto" />
@@ -123,15 +117,15 @@ table.tables1 {
 	    </tr>
 	    {% endfor %}
 	</table>
-        {% endif %}
 	See the <a href="/about">about page</a> for detailed description of each parameter.
-      </div>
+      
+      </div> 
+	   {% endif %}
       <br><br>
+	  {% if mut_data != None %}
       <button class="collapsible">Mutation and constraint</button>
       <div class="content">
-         {% if mut_data == None %}
-          <p> No Data Available. </p>
-          {% else %}
+    
 	<table border="1" cellpadding="5" cellspacing="5" class="tablesorter tablesorter-default">
 	  <thead class="tablesorter-header"><th>Parameter</th><th>Value</th></thead>
 	  <tbody>
@@ -165,16 +159,16 @@ table.tables1 {
 	    </tr>
 	  </tbody>
 	</table>
-        {% endif %}
+      
 	See the <a href="/about">about page</a> for detailed description of each parameter.
       </div>
+	    {% endif %}
       <br><br>
+	  {% if imp_data  != None %}
       <button class="collapsible">STR Imputation</button>
       <div class="content">
 	<h4>Locus-level imputation metrics</h4>
-        {% if imp_data  == None %}
-          <p> No Data Available. </p>
-          {% else %}
+
 	<table border="1" cellpadding="5" cellspacing="5" class="tableshorter tablesorter-default">
 	  <thead class="tablesorter-header"><th>Parameter</th><th>Value</th></thead>
 	  <tbody>
@@ -213,10 +207,9 @@ table.tables1 {
 	  </tbody>
 	</table>
         {% endif %}
+		{% if imp_data  != None %}
 	<h4>Allele-level imputation metrics </h4>
-        {% if imp_data  == None %}
-          <p> No Data Available. </p>
-          {% else %}
+       
 	<table border="1" cellpadding="5" cellspacing="5" class="tableshorter tablesorter-default">
 	  <thead class="tablesorter-header"><th>Allele (bp diff from hg19)</th><th>r2</th><th>P-val</th></thead>
 	  <tbody>
@@ -229,9 +222,10 @@ table.tables1 {
 	    {% endfor %}
 	  </tbody>
 	</table>
-        {% endif %}
+      
 	See the <a href="/about">about page</a> for detailed description of each parameter.
       </div>
+	  {% endif %}
       <br><br><br><br>
     </div>
   </div>

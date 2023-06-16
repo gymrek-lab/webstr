@@ -1,15 +1,31 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="container">
+  <div class="row mt-5">
+	  <div class="col-sm">
+      <h1>Data sources for hg38</h1>
+	  </div>
+	</div>
+  <div class="container" style="font-size: 16px;">
+    <div class="row">
+<ul>
+<li>Full SQL dump of hg38 data to set up WebSTR-API locally <a href="https://drive.google.com/file/d/1E76ClTn5dVFFpYmvXRq7IInBA_HKYw0B/view?usp=sharing">webstr_2023_06_16.dump</a></li>
+<li>EnsemblTR Reference panel archive <a href="https://drive.google.com/file/d/1hicWMyZKpSvdz4fa-g-POBRfUY6iPVam/view?usp=drive_link">ensembletr.zip</a></li>
+<li>Sinergia CRC Reference panel(gangstr_crc_hg38) <a href="https://drive.google.com/file/d/1b9zk34yIZypr_9sJRReAf0PMBaj9DWJP/view?usp=drive_link">crc_gangstr_hg38.tsv</a></li>
+<li>Sinergia CRC Reference panel(gangstr_crc_hg38) Variation Data archive <a href="https://drive.google.com/file/d/1XXfbSORp06wDnVtJJVOi819FGmz5K3Xl/view?usp=drive_link">crc_gangstr_hg38_TCGA_variation.gz</a></li>
+</ul>
+</div>
+</div>
+
 	<div class="row mt-5">
 	  <div class="col-sm">
-      <h1>Data sources</h1>
+      <h1>Data sources for hg19</h1>
 	  </div>
 	</div>
 
     <div class="container" style="font-size: 16px;">
       <div class="row">
-      WebSTR data is taken directly from these sources:
+      WebSTR data has been imported from these sources:
 <ul>
   <li>HipSTR hg19 reference STR regions available from the HipSTR github page <a href="https://github.com/HipSTR-Tool/HipSTR-references/blob/master/human/hg19.hipstr_reference.bed.gz">hg19.hipstr_reference.bed.gz</a></li>
   <li>Gene annotations use GENCODE version 19 (Ensembl 74) available in the file genocde.gtf.gz obtained from the <a href="http://broadinstitute.org/~konradk/exac_browser/exac_browser.tar.gz">ExAC data download</a></li>
