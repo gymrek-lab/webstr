@@ -150,7 +150,16 @@
               <select name="genome" class="form-control" style="display:none">
                 <option selected value="hg38">H. Sapiens (hg38)</option>
               </select>
-                <input id="navbar-searchbox-input" name="query" class="form-control mr-sm-2" type="text" placeholder="Gene, transcript, variant, or region"/>
+              <div class="form-group">
+                      <select name="genome" class="form-control">
+                        <option selected value="hg38">H. Sapiens (hg38)</option>
+                        <option value="hg19">H. Sapiens (hg19)</option>
+                      </select>
+                      <small class="form-text text-muted">
+                        Pick a genome
+                      </small>
+                    </div>
+                <input id="navbar-searchbox-input" name="query" class="form-control mr-sm-2" type="text" placeholder="Gene or region"/>
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </div>
         </form>
