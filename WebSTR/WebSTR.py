@@ -22,7 +22,6 @@ from region_view import *
 #################### Database paths ###############
 PLATFORM = "snorlax" # or AWS
 BASEPATH =  "/storage/resources/dbase/human/"
-BASEPATH = "/home/oxana/projects/webstr/data/"
 #os.environ['DATAPATH']
 if PLATFORM == "snorlax":
     #BasePath = "/storage/resources/dbase/dbSTR/SS1/" # TODO this is allele freq. not used now
