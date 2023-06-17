@@ -84,9 +84,9 @@ def GetRegionDataAPI(region_query):
     #genebuf = 0.1 # increase region width by this much
    
     df_hg38 = pd.DataFrame({})
-    print(region_query)
     if (colpos < 0):
-        if (ensemblid > 0):
+        # Region query starts with ENSG, index is 0
+        if (ensemblid == 0):
             strexp_url = API_URL + '/repeats/?ensembl_ids=' + region_query
         else:
             strexp_url = API_URL + '/repeats/?gene_names=' + region_query
@@ -478,7 +478,7 @@ def GetGeneGraph(region_query):
     colpos = region_query.find(":")
     ensemblid = region_query.find("ENSG")
     if colpos < 0: # search is by gene
-            if ensemblid > 0:
+            if ensemblid == 0:
                 gene_url = API_URL + '/genefeatures/?ensembl_ids=' + region_query 
             else:
                 gene_url = API_URL + '/genefeatures/?gene_names=' + region_query 
