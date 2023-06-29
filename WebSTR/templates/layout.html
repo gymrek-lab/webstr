@@ -147,12 +147,10 @@
           
           <form action="/search" class="form-inline my-2 my-lg-0" role="search">
             <div class="form-group" id="navbar-awesomebar">
-              <select name="genome" class="form-control" style="display:none">
-                <option selected value="hg38">H. Sapiens (hg38)</option>
-              </select>
               <div class="form-group">
-                      <select name="genome" class="form-control" style="display:none">
+                      <select name="genome" class="form-control" style="display:inline">
                         <option selected value="hg38">H. Sapiens (hg38)</option>
+			<option value="hg19">H. Sapiens (hg19)</option>
                       </select>
                     </div>
                 <input id="navbar-searchbox-input" name="query" class="form-control mr-sm-2" type="text" placeholder="Gene or region"/>
