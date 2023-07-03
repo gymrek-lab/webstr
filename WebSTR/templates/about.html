@@ -96,6 +96,7 @@
 				  TR separately onto a backbone of phased SNPs in a +/-50kb window, resulting in a single panel 
 				  containing both phased SNPs and TRs. The resulting panel contains a total of 1,089,670 TRs.
 			</p>
+			<p><b>Allele frequencies</b> are available for this dataset. Allele frequency is defined as the number of copies of the allele in a population divided by the sum of all alleles in a population. </p>
 			<center>
 				<img src="/static/images/EnsembleTR_summary.png" width="80%"> 
 			</center>
@@ -112,8 +113,20 @@
 			  "Trans-omic approach to colorectal cancer: an integrative computational and clinical perspective"
 			   </a> funded by a <a href="https://www.snf.ch/en/HzVMPWm96mz69ZJ8/funding/programmes/sinergia"></a> SNSF Sinergia grant.</a>
 		   </p>
+		
+		   <p>
+		   Cohort-level summary statistics describing locus-level patterns of genetic
+		    variation is stored in the WebSTR database and is publicly available for each STR.
+			The following parameters can be accessed:  
+			 <ul>
+				<li><b>avg_size_diff</b>: the average amount of repeat units difference that was found for this locus between healthy and tumor sample</li>
+				<li><b>total_calls</b>: the total number of patients where the locus was called in both the healthy and tumor sample.</li>
+				<li><b>frac_variable</b>: the fraction of patients where a difference in repeat size was observed between healthy and tumor for this locus. Calculated by dividing the number of patients with variable loci by total_calls</li>
+			</ul>
+			  Patient-level length variation data of each STR is controlled and available only upon approval from the 
+			  TCGA consortium as it can potentially be used to identify the patient. 
+			</p>
 		  
-
 			<br><br>
 			<h3> Earlier studies (mapped to hg19) </h3>
 			<h4><u>1. Expression STRs (eSTRs) (<a href="https://www.biorxiv.org/content/early/2018/12/13/495226">Fotsing <em>et al.</em> 2018</a>)</u></h4>
