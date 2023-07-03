@@ -15,16 +15,25 @@
                     <h4 class="media-heading">What is the definition of "short tandem repeat"?</h4>
 <p>
 We consider repeats with motif lengths between 1-6bp. E.g. AAAAA, ACACACACAC, CAGCAGCAGCAG, TATCTATCTATCTATCTATC,
- TTTTGTTTTGTTTTGTTTTG, AAAAACAAAAACAAAAAC would all fall under this definition. The set of STRs used by WebSTR
-  was obtained from the HipSTR hg19 reference STR file.
+ TTTTGTTTTGTTTTGTTTTG, AAAAACAAAAACAAAAAC would all fall under this definition. 
 </p>
                     <h4 class="media-heading">What STR tools were used to generate results displayed on WebSTR?</h4>
 		    <p>
-		      We have helped develop <a href="https://github.com/mgymrek/lobstr-code">lobSTR</a> and 
-              <a href="https://github.com/tfwillems/HipSTR">HipSTR</a> and  <a href="https://github.com/gymreklab/GangSTR">GangSTR</a> for genome-wide genotyping of STRs from 
+		      We have helped develop <a href="https://github.com/tfwillems/HipSTR">HipSTR</a> and  <a href="https://github.com/gymreklab/GangSTR">GangSTR</a> for genome-wide genotyping of STRs from 
               next-generation sequencing data. Earlier work (mutation rates and constraint) are based on genotypes 
-              obtained using lobSTR. More recent work (GTEx eSTRs, imputation results) are based on genotypes obtained using HipSTR and GangSTR.
-		      </p>
+              obtained using <a href="https://github.com/mgymrek/lobstr-code">lobSTR</a>. More recent work (GTEx eSTRs, imputation results) are based on genotypes obtained using HipSTR and GangSTR.
+              Recent dataset called EnsebmleTR incorporates even other STR callers like Illumina's <a href="https://github.com/Illumina/ExpansionHunter">ExpansionHunter</a>. 
+            </p>
+            <h4 class="media-heading">I can't find an STR locus I am interested in on WebSTR. Why are some STRs are not present in the WebSTR database?</h4>
+            <p>
+                We are aiming to create the most comprehensive genome-wide dataset of STRs and if the loci you are searching has been previously described in the literature
+                it should be available on WebSTR. However, WebSTR is currently split in several subsets (STR panels) that are using different methods to both identify repeats on
+                the reference genome and to further genotype repeat variations. Due to the statistical nature of these pipelines and filters used at the different stages of the analysis (for instance 
+                excluding overlapping repeats) an important loci could have been filtered out. In this case we aim to manually update important missing loci, so please contact us if you find
+                such a case. 
+     
+            </p>
+
           <h4 class="media-heading">Does WebSTR display allele frequency information?</h4>
 		    <p>
  Yes, if allele frequency statistics are available they are displayed on the locus level page for several cohorts consisting of European, 
