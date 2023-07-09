@@ -236,9 +236,10 @@ def unhandled_exception(e):
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--host", help="Host to run app", type=str, default="0.0.0.0")
-    parser.add_argument("--port", help="Port to run app", type=int, default=5000)
+    parser.add_argument("--port", help="Port to run app", type=int, default=int(os.environ.get("FLASK_PORT", "5000"))) 
     args = parser.parse_args()
-    server.run(debug=False, host=args.host, port=args.port)
+    # FLASK_DEBUG is not mandatory but can be handy to configure debugging in a container
+    server.run(debug= os.environ.get("FLASK_DEBUG", 0) == "1", host=args.host, port=args.port)
 
 if __name__ == '__main__':
     main()

@@ -1,4 +1,5 @@
 import json
+import os
 import requests
 import pandas as pd
 import numpy as np
@@ -13,7 +14,7 @@ GENEBUFFER = 0.1
 EXON_WIDTH = 0.3
 GENE_WIDTH = 0.03
 GENE_COLOR = "black"
-API_URL = 'http://webstr-api.ucsd.edu'
+API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 #API_URL = 'http://0.0.0.0:5000'
 
 def GetRegionData(region_query, DbSTRPath):
