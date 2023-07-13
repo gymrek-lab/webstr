@@ -79,6 +79,50 @@
 			<p>
 				<h2>Available datasets</h2>
 			</p>
+
+
+                        <table>
+    <tr>
+      <th>Panel alias</th>
+      <th>Human Genome Assembly Version</th>
+      <th>Annotation Method</th>
+      <th>Genotyping Methods</th>
+      <th>STRs</th>
+      <th>Cohorts</th>
+      <th>Samples</th>
+      <th>Available Data</th>
+    </tr>
+    <tr>
+      <td>ensembletr_hg38</td>
+      <td>GRCh38.p2</td>
+      <td>TRF</td>
+      <td>EnsembleTR<br>ExpansionHunter<br>GangSTR<br>HipSTR</td>
+      <td>1,710,833 total reference panel with allele frequency data available<br>35,998<br>1,133,225<br>1,331,280</td>
+      <td>1000Genomes/H3Africa</td>
+      <td>3,550</td>
+      <td>Allele frequencies</td>
+    </tr>
+    <tr>
+      <td>gangstr_crc_hg38</td>
+      <td>GRCh38.p2</td>
+      <td>TRAL</td>
+      <td>GangSTR</td>
+      <td>1,548,993 Reference STRs<br>219,394 were found to have at least 1 variation call in the dataset<br>81,262 STRs have reliable variation data</td>
+      <td>Sinergia-CRC</td>
+      <td>412</td>
+      <td>Average variation of the number of repeat units in the dataset</td>
+    </tr>
+    <tr>
+      <td>hipstr_hg19</td>
+      <td>GRCh37</td>
+      <td>TRF</td>
+      <td>HipSTR</td>
+      <td>~1.6 million</td>
+      <td>GTEx<br>SSC<br>1000Genomes<br>SGDP</td>
+      <td>652<br>1,916<br>150<br>300</td>
+      <td>Allele frequencies,trait associations, imputation metrics, mutation parameters</td> 
+  </table>
+
 			<p>
 			STR pages feature datasets from the following studies:
 			</p>
@@ -92,7 +136,7 @@
 			   autosomal chromosomes. After removing TRs called in fewer than 75% of samples, 1,711,093 TRs remained.
 			    Of those, 55% were only genotyped by a single method, largely reflecting differences in 
 				TR reference sets published for each tool. Finally, we generated a phased reference haplotype panel of SNPs/short
-				 indels and TRs from the 1000GP samples. We used our previously published pipeline35 to phase each
+				 indels and TRs from the 1000GP samples. We used our previously published pipeline to phase each
 				  TR separately onto a backbone of phased SNPs in a +/-50kb window, resulting in a single panel 
 				  containing both phased SNPs and TRs. The resulting panel contains a total of 1,089,670 TRs.
 			</p>
@@ -129,7 +173,7 @@
 		  
 			<br><br>
 			<h3> Earlier studies (mapped to hg19) </h3>
-			<h4><u>1. Expression STRs (eSTRs) (<a href="https://www.biorxiv.org/content/early/2018/12/13/495226">Fotsing <em>et al.</em> 2018</a>)</u></h4>
+			<h4><u>1. Expression STRs (eSTRs) (<a href="https://pubmed.ncbi.nlm.nih.gov/31676866/">Fotsing <em>et al.</em> 2019</a>)</u></h4>
 			<p>
 			In this study we analyzed STRs in whole genome sequencing data from the <a href="gtexportal.org">Genotype Tissue Expression (GTEx) Project</a> for 650 individuals and gene expression across 17 tissues to detect STRs whose lengths are correlated with expression of nearby genes (termed "eSTRs"). We further used CAVIAR to fine-map associations for individual genes against nearby SNPs to identify eSTRs most likely acting as causal variants. The figure below shows a schematic of the study design.
 			</p>

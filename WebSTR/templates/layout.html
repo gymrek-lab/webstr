@@ -123,6 +123,21 @@
   border: 1px solid white;
 
 }
+
+table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  
+
 </style>
 
 </head>
@@ -147,11 +162,38 @@
           <form action="/search" class="form-inline my-2 my-lg-0" role="search">
             <div class="form-group" id="navbar-awesomebar">
               <div class="form-group">
-                      <select name="genome" class="form-control" style="display:inline">
-                        <option selected value="hg38">H. Sapiens (hg38)</option>
+                      <select name="genome" id = "genome-select" class="form-control" style="display:inline">
+                        <option value="hg38">H. Sapiens (hg38)</option>
 			<option value="hg19">H. Sapiens (hg19)</option>
                       </select>
                     </div>
+
+
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+  var lastSelectedOption = localStorage.getItem('selectedGenomeOption');
+
+  var genomeSelect = document.getElementById('genome-select');
+  genomeSelect.value = lastSelectedOption || 'hg38';
+
+  genomeSelect.addEventListener('change', function(e) {
+    var selectedOption = e.target.value;
+    localStorage.setItem('selectedGenomeOption', selectedOption);
+  });
+
+  if (window.location.pathname === '/') {
+    localStorage.removeItem('selectedGenomeOption');
+    genomeSelect.value = 'hg38';
+  }
+});
+  
+                    </script>
+
+              
+            
+
+                  
+                
                 <input id="navbar-searchbox-input" name="query" class="form-control mr-sm-2" type="text" placeholder="Gene or region"/>
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </div>
