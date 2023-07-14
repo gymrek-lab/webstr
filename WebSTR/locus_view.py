@@ -41,10 +41,8 @@ def GetSTRInfo(strid, DbSTRPath, reffa):
     end = int(df[0][2])
     motif = df[0][3]
     copies = df[0][4]
-    print(GetSTRInfo)
     lflank = str(reffa[chrom][start-seqbuf:start]).upper()
     strseq = str(reffa[chrom][start:end]).upper()
-    print(strseq)
     rflank = str(reffa[chrom][end:end+seqbuf]).upper()
     seq = GetSTRSeqHTML(lflank,strseq,rflank)
     return chrom, start, end, motif, copies, seq
@@ -52,12 +50,10 @@ def GetSTRInfo(strid, DbSTRPath, reffa):
 def GetSTRInfoAPI(repeat_id, reffa):
     
     repeat_url = API_URL + '/repeatinfo/?repeat_id=' + repeat_id 
-    print("calling api with " + repeat_url)
     
     resp = requests.get(repeat_url)
     repeat = json.loads(resp.text)
 
-    print(repeat)
 
     #if len(df) == 0: return None, None, None, None
     chrom = repeat['chr']
@@ -68,7 +64,6 @@ def GetSTRInfoAPI(repeat_id, reffa):
     gene_name = repeat['gene_name']
     gene_desc = repeat['gene_desc']
     crc_data = []
-    print(repeat)
     if repeat['total_calls'] is not None:
         crc_data = [repeat['total_calls'], repeat['frac_variable'], repeat['avg_size_diff']]
 
@@ -77,7 +72,6 @@ def GetSTRInfoAPI(repeat_id, reffa):
     strseq = str(reffa[chrom][start-1:end]).upper()
     rflank = str(reffa[chrom][end:end+seqbuf]).upper()
     seq = GetSTRSeqHTML(lflank,strseq,rflank)
-    print(seq)
     return chrom, start, end, seq, gene_name, gene_desc, motif, copies, crc_data
 
 def GetGTExInfo(strid, DbSTRPath):
@@ -119,16 +113,12 @@ def GetFreqSTRInfo(strid,DbSTRPath):
               " and str_id = '{}' "
               " group by cohort_id, copies").format(strid)
     df = ct.execute(gquery).fetchall()
-    print("sqllite: allele freqs")
-    print(df)
     return df
 
 def GetFreqSTRInfoAPI(repeat_id):
     repeat_url = API_URL + '/allfreqs/?repeat_id=' + repeat_id 
-    print("calling api with " + repeat_url)
     
     resp = requests.get(repeat_url)
-    print(resp.text)
     df = pd.DataFrame.from_records(json.loads(resp.text))
 
     if not df.empty:
@@ -136,11 +126,7 @@ def GetFreqSTRInfoAPI(repeat_id):
         df["copies"] = df["n_effective"]
         grouped_df = df[["population", "copies", "percentage"]].groupby(by="population")
     
-        for key, item in grouped_df:
-            print(grouped_df.get_group(key), "\n\n")
 
-        print("API, allele freqs: ")
-        print(grouped_df)
         return grouped_df
     else:
         return None
