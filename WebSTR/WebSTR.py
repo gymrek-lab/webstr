@@ -225,6 +225,8 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--host", help="Host to run app", type=str, default="0.0.0.0")
     parser.add_argument("--port", help="Port to run app", type=int, default=5000)
+    parser.add_argument("--ref-hg38", help="Address to hg38 ref genome", type=str, default="/storage/resources/dbase/human/hg38/hg38.fa")
+    parser.add_argument("--ref-hg19", help="Address to hg19 ref genome", type=str, default="/storage/resources/dbase/human/hg19/hg19.fa")
     args = parser.parse_args()
     server.run(debug=False, host=args.host, port=args.port)
 
