@@ -86,6 +86,9 @@ def GetRegionDataAPI(region_query):
         else:
             strexp_url = API_URL + '/repeats/?gene_names=' + region_query
     elif (colpos > 0):
+        #strip chr
+        if region_query.lower().startswith("chr"):
+        	region_query = region_query[3:]
         strexp_url = API_URL + '/repeats/?region_query=' + region_query
         
     resp = requests.get(strexp_url)
