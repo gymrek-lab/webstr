@@ -20,6 +20,12 @@ def GetRegionData(region_query, DbSTRPath):
     print("GetRegionData")
     ct = connect_db(DbSTRPath).cursor()
     colpos = region_query.find(":")
+    
+    # This is to enable searching for the region starting with chr as well as just the number
+    chromosome = region_query.find("CHR")
+    if (chromosome == 0):
+        region_query = region_query.replace("CHR","")
+
     genebuf = 0.1 # increase region width by this much
     df_hg19 = pd.DataFrame({})
    
@@ -81,6 +87,11 @@ def GetRegionDataAPI(region_query):
     
     colpos = region_query.find(":")
     ensemblid = region_query.find("ENSG")
+    
+    # This is to enable searching for the region starting with chr as well as just the number
+    chromosome = region_query.find("CHR")
+    if (chromosome == 0):
+        region_query = region_query.replace("CHR","") 
     #genebuf = 0.1 # increase region width by this much
    
     df_hg38 = pd.DataFrame({})
