@@ -72,7 +72,7 @@ def search():
     region_queryOrg = request.args.get('query')
     print(region_queryOrg)
     region_query = region_queryOrg.upper()
-
+    
     if (region_queryGenome == 'hg19'):
         region_data = GetRegionData(region_query, DbSTRPath)
         
