@@ -163,6 +163,53 @@ table.tables1 {
 	See the <a href="/about">about page</a> for detailed description of each parameter.
       </div>
 	    {% endif %}
+<!--
+ <br><br>
+
+
+          {% if seq_data != None %}
+      <button class="collapsible">Sequence Data</button>
+      <div class="content">
+
+        <table border="1" cellpadding="5" cellspacing="5" class="tablesorter tablesorter-default">
+          <thead class="tablesorter-header"><th>Parameter</th><th>Value</th></thead>
+          <tbody>
+          <tr>
+              <td><b>ID</b></td>
+              <td>{{ '%.2e' % seq_data[0]|float }}</td>
+            </tr>
+            <tr>
+              <td><b>Population</b></td>
+              <td>{{ seq_data[1] }}</td>
+            </tr>
+            <tr>
+              <td><b>n_effective</b></td>
+              <td>{{ '%.3f' % seq_data[2]|float }}</td>
+            </tr>
+            <tr>
+              <td><b>Frequency</b></td>
+              <td>{{ '%.3f' % seq_data[3]|float }}</td>
+            </tr>
+            <tr>
+              <td><b>Het</b></td>
+              <td>{{ '%.3f' % seq_data[4]|float }}</td>
+            </tr>
+            <tr>
+              <td><b>Num_called</b></td>
+              <td>{{ '%.3f' % seq_data[5]|float }}</td>
+            </tr>
+            <tr>
+              <td><b>Repeat_id</b></td>
+              <td>{{ '%.3f' % seq_data[6]|float }}</td>
+            </tr>
+            <tr>
+              <td><b>Sequence</b></td>
+              <td>{{  seq_data[7] }}</td>
+          </tbody>
+        </table>
+      </div>
+            {% endif %}
+    end comment-->
       <br><br>
 	  {% if imp_data  != None %}
       <button class="collapsible">STR Imputation</button>

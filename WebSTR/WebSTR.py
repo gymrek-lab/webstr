@@ -120,6 +120,7 @@ def locusview():
     str_query = request.args.get('repeat_id')
     genome_query = request.args.get('genome')
     mut_data = []
+    seq_data = []
     imp_data = []
     gtex_data = []
     imp_allele_data = []
@@ -138,6 +139,7 @@ def locusview():
         chrom, start, end, motif, copies, seq = GetSTRInfo(str_query, DbSTRPath, reffa)
         gtex_data = GetGTExInfo(str_query, DbSTRPath)
         mut_data = GetMutInfo(str_query, DbSTRPath)
+        seq_data = GetSeqInfo(str_query, DbSTRPath)
         imp_data = GetImputationInfo(str_query, DbSTRPath)
         imp_allele_data = GetImputationAlleleInfo(str_query, DbSTRPath)
         freq_dist = GetFreqSTRInfo(str_query, DbSTRPath)

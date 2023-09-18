@@ -96,6 +96,17 @@ def GetMutInfo(strid, DbSTRPath):
     df = ct.execute(gquery).fetchall()
     return df
 
+
+
+def GetSeqInfo(strid, DbSTRPath):
+    ct = connect_db(DbSTRPath).cursor()
+    gquery = ("select seq.id, seq.population, seq.n_effective, seq.frequency, seq.het, seq.num_called, seq.repeat_id, seq.sequence"
+              " from allele_sequences seq where seq.str_id = '{}'").format(strid) 
+    df = ct.execute(gquery).fetchall()
+    return df
+
+
+
 def GetImputationInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     gquery = ("select imp.loo_concordance,imp.loo_r,imp.wgs_eur_concordance,imp.wgs_eur_r,imp.wgs_afr_concordance,imp.wgs_afr_r,"
