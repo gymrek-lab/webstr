@@ -75,6 +75,8 @@ def GetSTRInfoAPI(repeat_id, reffa):
     seq = GetSTRSeqHTML(lflank,strseq,rflank)
     return chrom, start, end, seq, gene_name, gene_desc, motif, copies, crc_data
 
+
+
 def GetGTExInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     gquery = ("select estr.gene,estr.genename,ti.tissue,estr.beta,estr.beta_se,estr.pval,estr.caviar "
@@ -89,7 +91,7 @@ def GetGTExInfo(strid, DbSTRPath):
               "and strid = '{}' order by estr.caviar desc").format(strid)
     df = ct.execute(gquery).fetchall()
     return df
-
+ 
 def GetMutInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     gquery = ("select mut.est_logmu_ml, mut.est_beta_ml, mut.est_pgeom_ml, mut.up, mut.down, mut.p, mut.zscore_1, mut.zscore_2"
@@ -131,9 +133,7 @@ def GetFreqSTRInfoAPI(repeat_id):
         return grouped_df
     else:
         return None
-    #print(pd.DataFrame(np.array(grouped_df).reshape(-1,5), columns = list("abcdf")))
 
-    #return grouped_df
 
 def GetImputationAlleleInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()

@@ -18,20 +18,35 @@
 			"dependsOn": [
 				"docker-build"
 			],
+			
 			"dockerRun": {
 				"env": {
-					"FLASK_APP": "WebSTR:server"
-				}
+					"FLASK_APP": "WebSTR:server",
+					"FLASK_DEBUG": "1",
+					"WEBSTR_API_URL": "http://host.docker.internal:5000",
+				},
+				"volumes": [
+					{
+					  "containerPath": "/app",
+					  "localPath": "${workspaceFolder}"
+					}
+				],
+				"ports": [
+					{
+					  "containerPort": 5001,
+					  "hostPort": 5001
+					}
+				]
 			},
 			"python": {
 				"args": [
 					"run",
-					"--no-debugger",
-					"--no-reload",
+					//"--no-debugger",
+					//"--no-reload",
 					"--host",
 					"0.0.0.0",
 					"--port",
-					"5000"
+					"5001"
 				],
 				"module": "flask"
 			}
