@@ -66,13 +66,9 @@ server.secret_key = 'dbSTR'
 @server.route('/search')
 def search():
     region_queryGenome = request.args.get('genome')
-    print("Selected genome")
-    print(region_queryGenome)
-    print("___________________________________")
     region_queryOrg = request.args.get('query')
-    print(region_queryOrg)
     region_query = region_queryOrg.upper()
-
+    
     if (region_queryGenome == 'hg19'):
         region_data = GetRegionData(region_query, DbSTRPath)
         
@@ -85,12 +81,9 @@ def search():
             Regions_data = pd.merge(Regions_data, estr_data, left_on='strid', right_on = 'str_id', how='left')
             Regions_data = Regions_data.replace(np.nan, '', regex=True)
             # Get the STRs on the plotly graph
-            print("About to start with the graph")
             Regions_data.rename(columns = {'chrom':'chr', 'str.start':'start', 'str.end': 'end'}, inplace = True)
-            print(Regions_data)
             #chrom = Regions_data["chr"].values[0].replace("chr","")
             gene_trace, gene_shapes, numgenes, min_gene_start, max_gene_end = GetGeneShapes(region_query, DbSTRPath)
-            print(max_gene_end)
             region_data2 = Regions_data
             #if (max_gene_end) > 0:
             #    region_data2 =  GetRegionData(region_data["chr"].values[0] + ":" + str(min_gene_start) + "-" + str(max_gene_end), DbSTRPath)
@@ -111,9 +104,6 @@ def search():
         if region_data_hg38.shape[0] > 0:
             gene_trace_hg38, gene_shapes_hg38, numgenes_hg38, min_gene_start_hg38, max_gene_end_hg38 = GetGeneGraph(region_query)
             plotly_plot_json_hg38, plotly_layout_json_hg38 = GetGenePlotlyJSON(region_data_hg38, gene_trace_hg38, gene_shapes_hg38, numgenes_hg38)
-            print("Got results")
-            print("About to render templates")
-            print(region_data_hg38.to_records(index=False))
             return render_template('view2.html',
                                     table = region_data_hg38.to_records(index=False),
                                     graphJSON = plotly_plot_json_hg38, layoutJSON = plotly_layout_json_hg38,
@@ -127,10 +117,8 @@ def search():
 
 @server.route('/locus')
 def locusview():
-    print("locusview")
     str_query = request.args.get('repeat_id')
     genome_query = request.args.get('genome')
-    print((genome_query == 'hg38'))
     mut_data = []
     imp_data = []
     gtex_data = []
@@ -153,17 +141,13 @@ def locusview():
         imp_data = GetImputationInfo(str_query, DbSTRPath)
         imp_allele_data = GetImputationAlleleInfo(str_query, DbSTRPath)
         freq_dist = GetFreqSTRInfo(str_query, DbSTRPath)
-        print(freq_dist)
         if len(freq_dist) > 0:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON2(freq_dist)
         
     elif (genome_query == 'hg38'):
-        print("locus view hg38")
         reffa = pyfaidx.Fasta(RefFaPath_hg38)
         chrom, start, end, seq, gene_name, gene_desc, motif, copies, crc_data = GetSTRInfoAPI(str_query, reffa)
-        print("Getting allele freqs")
         freq_dist = GetFreqSTRInfoAPI(str_query)
-        print(freq_dist)
         if freq_dist:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
         
@@ -180,7 +164,6 @@ def locusview():
     if len(imp_allele_data) == 0: imp_allele_data = None
 
     
-    print("about to render")
     return render_template('locus.html', strid=str_query,
                            graphJSONx=plotly_plot_json_datab,graphlayoutx=plotly_plot_json_layoutb, 
                            chrom=chrom.replace("chr",""), start=start, end=end, strseq=seq,
@@ -221,6 +204,11 @@ def my_method():
     except Exception as e:
             render_template("500.html", error= str(e))
 
+@server.route('/pathogenic')
+def dbSTRpathogenic():
+    return render_template("pathogenic.html")
+
+
 @server.errorhandler(404)
 def internal_server_error(error):
     server.logger.error('Server Error: %s', (error))
@@ -237,6 +225,9 @@ def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--host", help="Host to run app", type=str, default="0.0.0.0")
     parser.add_argument("--port", help="Port to run app", type=int, default=int(os.environ.get("FLASK_PORT", "5000"))) 
+    parser.add_argument("--ref-hg38", help="Address to hg38 ref genome", type=str, default="/storage/resources/dbase/human/hg38/hg38.fa")
+    parser.add_argument("--ref-hg19", help="Address to hg19 ref genome", type=str, default="/storage/resources/dbase/human/hg19/hg19.fa")
+
     args = parser.parse_args()
     # FLASK_DEBUG is not mandatory but can be handy to configure debugging in a container
     server.run(debug= os.environ.get("FLASK_DEBUG", 0) == "1", host=args.host, port=args.port)
