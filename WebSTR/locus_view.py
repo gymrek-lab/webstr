@@ -1,3 +1,4 @@
+import os
 from dbutils import *
 import pyfaidx
 import requests
@@ -6,7 +7,7 @@ import numpy as np
 
 seqbuf = 120
 seqbreakline = 100
-API_URL = 'http://webstr-api.ucsd.edu'
+API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 #API_URL = 'http://0.0.0.0:5000'
 
 def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
