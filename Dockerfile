@@ -1,12 +1,23 @@
-# For more information, please refer to https://aka.ms/vscode-docker-python
+# ---------------------------------------------
+# Image with packages installed
+# ---------------------------------------------
 FROM python:3.11-slim as base
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 COPY requirements.txt .
-RUN python -m pip install -r requirements.txt --no-cache-dir
 
+RUN apt-get update && \
+    apt-get install -y gcc python3-dev build-essential  && \
+    pip install -r requirements.txt --no-cache-dir  && \
+    apt-get remove -y gcc python3-dev build-essential && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+# ---------------------------------------------
+# Image with source code that runs python entrypoint
+# ---------------------------------------------
 FROM base as local
 COPY . /app
 WORKDIR /app/WebSTR
@@ -23,11 +34,18 @@ ENV FLASK_DEBUG=1
 EXPOSE ${FLASK_PORT}
 ENTRYPOINT ["python", "WebSTR.py"]
 
+
+# -------------------------------------------------------------------
+# Image with source code that runs in debug without gunicorn
+# -------------------------------------------------------------------
 FROM local as debug
 # Turns on Flask debug
 ENV FLASK_DEBUG=1
 
 
+# -------------------------------------------------------------------
+# Image with source code that runs prod setup with gunicorn
+# -------------------------------------------------------------------
 FROM local as prod
 # Turns off Flask debug
 ENV FLASK_DEBUG=0
