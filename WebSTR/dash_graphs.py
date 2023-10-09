@@ -127,5 +127,5 @@ def add_dash_graphs_to_flask_server(server):
     Returns:
     None
     """
-    dash_app = dash.Dash(server=server, routes_pathname_prefix="/dash/")
+    dash_app = dash.Dash(server=server, routes_pathname_prefix="/dash/", serve_locally=False)
     dash_app.layout = render_crc_expr_len_corr_volcano_plot()
