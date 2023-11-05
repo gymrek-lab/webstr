@@ -18,11 +18,13 @@ def GetCrcExprRepeatLenCorrInfoAPI():
     """
 
     repeat_url = API_URL + '/crc_expr_repeatlen_corr/'
+
+    logging.warn(f"GetCrcExprRepeatLenCorrInfoAPI is loading data from {repeat_url}")
     
     resp = requests.get(repeat_url)
     data_frame = pd.read_json(resp.text)
 
-    logging.info(f"GetCrcExprRepeatLenCorrInfoAPI recieved {len(data_frame)} entities")
+    logging.warn(f"GetCrcExprRepeatLenCorrInfoAPI recieved {len(data_frame)} entities")
 
     return data_frame
 
@@ -47,6 +49,17 @@ DATASET_CRC_EXPR_LEN_CORR = {
             )
     }
 
+def load_crc_corr():
+    data =  GetCrcExprRepeatLenCorrInfoAPI()
+    DATASET_CRC_EXPR_LEN_CORR_BY_DISPLAY_TEXT.clear()
+
+    for i, row in data.iterrows():
+        data.at[i, 'annotation'] = f"{row['name']} {row['ensembl_id']} <br>REPEAT: {row['chr']}_{row['start']}" 
+        DATASET_CRC_EXPR_LEN_CORR_BY_DISPLAY_TEXT[data.at[i, 'annotation']] = data.iloc[i]
+
+    logging.warn(f"padded annotations to {i} rows")
+    DATASET_CRC_EXPR_LEN_CORR['dataframe'] = data
+
 
 @callback(
         Output('dashbio-default-volcanoplot', 'figure'),
@@ -56,11 +69,7 @@ def render_volcano_plot(effects):
     """Update rendering of data points upon changing x-value of vertical dashed lines."""
 
     if DATASET_CRC_EXPR_LEN_CORR['dataframe'] is None:
-        data =  GetCrcExprRepeatLenCorrInfoAPI()
-        for i, row in data.iterrows():
-            data.at[i, 'annotation'] = f"{row['name']} {row['ensembl_id']} <br>REPEAT: {row['chr']}_{row['start']}" 
-            DATASET_CRC_EXPR_LEN_CORR_BY_DISPLAY_TEXT[data.at[i, 'annotation']] = data.iloc[i]
-        DATASET_CRC_EXPR_LEN_CORR['dataframe'] = data
+        load_crc_corr()
 
     return dashbio.VolcanoPlot(
         DATASET_CRC_EXPR_LEN_CORR['dataframe'],     
@@ -127,5 +136,15 @@ def add_dash_graphs_to_flask_server(server):
     Returns:
     None
     """
-    dash_app = dash.Dash(server=server, routes_pathname_prefix="/dash/", serve_locally=False)
+
+    try:
+        load_crc_corr()
+    except Exception as ex:
+        logging.error(f"Failed to load CRC expression length correlation data, next attempt will be made on first request to /crc_research page. {ex}") 
+
+    dash_app = dash.Dash(
+        server=server, 
+        routes_pathname_prefix="/dash/", 
+        serve_locally=False
+    )
     dash_app.layout = render_crc_expr_len_corr_volcano_plot()
