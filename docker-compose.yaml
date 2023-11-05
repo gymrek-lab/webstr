@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+
+  frontend:
+    environment:
+      - FLASK_PORT=5001
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5001:5001
+
+
+
