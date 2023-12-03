@@ -28,7 +28,6 @@ def GetCrcExprRepeatLenCorrInfoAPI():
 
     return data_frame
 
-DATASET_CRC_EXPR_LEN_CORR_BY_DISPLAY_TEXT = {}
 DATASET_CRC_EXPR_LEN_CORR = {
             'label': 'STR',
             'dataframe': None,
@@ -46,19 +45,21 @@ DATASET_CRC_EXPR_LEN_CORR = {
                 title='Correlation between gene expression and STR length in CRC patients',
                 genomewideline_value = 2,
                 #annotation='annotation'
-            )
+            ),
+            'annotations': {}
     }
 
 def load_crc_corr():
     data =  GetCrcExprRepeatLenCorrInfoAPI()
-    DATASET_CRC_EXPR_LEN_CORR_BY_DISPLAY_TEXT.clear()
+    annotations = {}
 
     for i, row in data.iterrows():
         data.at[i, 'annotation'] = f"{row['name']} {row['ensembl_id']} <br>REPEAT: {row['chr']}_{row['start']}" 
-        DATASET_CRC_EXPR_LEN_CORR_BY_DISPLAY_TEXT[data.at[i, 'annotation']] = data.iloc[i]
+        annotations[data.at[i, 'annotation']] = data.iloc[i]
 
     logging.warn(f"padded annotations to {i} rows")
     DATASET_CRC_EXPR_LEN_CORR['dataframe'] = data
+    DATASET_CRC_EXPR_LEN_CORR['annotations'] = annotations
 
 
 @callback(
@@ -91,13 +92,13 @@ def render_volcano_selection(clickData):
         """
         if annotation and annotation.startswith("<br>GENE: "):
             annotation = annotation[10:]
-            data_object = DATASET_CRC_EXPR_LEN_CORR_BY_DISPLAY_TEXT[annotation]  
+            data_object = DATASET_CRC_EXPR_LEN_CORR['annotations'][annotation]  
 
             return html.Span([
                 f"Selected GENE: ",  
-                html.A(target='_blank', href=f"{API_URL}/search?query={data_object['name']}&genome=hg38",          children=f"{data_object['name']} ({data_object['ensembl_id']})"), 
+                html.A(target='_blank', href=f"/search?query={data_object['name']}&genome=hg38",          children=f"{data_object['name']} ({data_object['ensembl_id']})"), 
                 " and STR: ", 
-                html.A(target='_blank', href=f"{API_URL}/locus?repeat_id={data_object['repeat_id']}&genome=hg38",  children=f"{data_object['chr']}_{data_object['start']}")
+                html.A(target='_blank', href=f"/locus?repeat_id={data_object['repeat_id']}&genome=hg38",  children=f"{data_object['chr']}_{data_object['start']}")
             ])
     return html.Span("Nothing selected")
 
