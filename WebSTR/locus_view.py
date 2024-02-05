@@ -3,11 +3,13 @@ import pyfaidx
 import requests
 import json
 import numpy as np
+import pandas as pd
+
 
 seqbuf = 120
 seqbreakline = 100
-API_URL = 'http://webstr-api.ucsd.edu'
-#API_URL = 'http://0.0.0.0:5000'
+#API_URL = 'http://webstr-api.ucsd.edu'
+API_URL = 'http://0.0.0.0:5000'
 
 def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
     ret = '<font size="3" color="black">...'
@@ -98,14 +100,17 @@ def GetMutInfo(strid, DbSTRPath):
 
 
 
-def GetSeqInfo(strid, DbSTRPath):
-    ct = connect_db(DbSTRPath).cursor()
-    gquery = ("select seq.id, seq.population, seq.n_effective, seq.frequency, seq.het, seq.num_called, seq.repeat_id, seq.sequence"
-              " from allele_sequences seq where seq.str_id = '{}'").format(strid) 
-    df = ct.execute(gquery).fetchall()
-    return df
-
-
+def GetSeqDataAPI(repeat_id):
+    
+    seq_url = API_URL + '/allseq/?repeat_id=' + repeat_id
+    print(seq_url)
+    resp = requests.get(seq_url)
+    df = pd.DataFrame.from_records(resp.json())
+    seq_data = df.to_dict(orient='records')
+    print(df)
+    #pd.DataFrame.from_records(resp.json())
+    return seq_data
+    
 
 def GetImputationInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()

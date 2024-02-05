@@ -139,7 +139,6 @@ def locusview():
         chrom, start, end, motif, copies, seq = GetSTRInfo(str_query, DbSTRPath, reffa)
         gtex_data = GetGTExInfo(str_query, DbSTRPath)
         mut_data = GetMutInfo(str_query, DbSTRPath)
-        seq_data = GetSeqInfo(str_query, DbSTRPath)
         imp_data = GetImputationInfo(str_query, DbSTRPath)
         imp_allele_data = GetImputationAlleleInfo(str_query, DbSTRPath)
         freq_dist = GetFreqSTRInfo(str_query, DbSTRPath)
@@ -152,7 +151,9 @@ def locusview():
         freq_dist = GetFreqSTRInfoAPI(str_query)
         if freq_dist:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
-        
+        seq_data = GetSeqDataAPI(str_query)
+  
+    
     if len(mut_data) != 1: mut_data = None
     else:
         mut_data = list(mut_data[0])
@@ -171,7 +172,7 @@ def locusview():
                            chrom=chrom.replace("chr",""), start=start, end=end, strseq=seq,
                            gene_name=gene_name, gene_desc=gene_desc,
                            estr=gtex_data, mut_data=mut_data, motif=motif, copies=copies, crc_data = crc_data,
-                           imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist)
+                           imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist, seq_data = seq_data)
 
 #################### Render HTML pages ###############
 @server.route('/')

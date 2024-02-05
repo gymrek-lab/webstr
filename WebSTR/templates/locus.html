@@ -122,6 +122,83 @@ table.tables1 {
       </div> 
 	   {% endif %}
       <br><br>
+
+
+
+
+<button class="collapsible">Sequence Data</button>
+<div class="content">
+  {% if seq_data|length > 0 %}
+    <!--Print seq_data -->
+    <pre>{{ seq_data | tojson(indent=2) }}</pre>
+
+    <style>
+      .tablesorter td {
+        font-size: 14px;
+      }
+
+      .tablesorter td.sequence-column {
+        font-size: 16px; 
+      }
+
+      .color-A {
+        color: red;
+      }
+
+      .color-T {
+        color: blue;
+      }
+
+      .color-C {
+        color: darkorange;
+      }
+
+      .color-G {
+        color: green;
+      }
+
+      .sequence-column {
+        width: 30%;
+      }
+    </style>
+
+    <table border="1" cellpadding="5" cellspacing="5" class="tablesorter tablesorter-default">
+      <thead class="tablesorter-header">
+        <tr>
+          <th class="sequence-column">Sequence</th>
+          <th>Population</th>
+          <th>Frequency</th>
+          <th>Number Called</th>
+        </tr>
+      </thead>
+      {% for row in seq_data %}
+        <tr>
+          <td class="sequence-column">
+            {% for nucleotide in row.sequence %}
+              <span class="color-{% if nucleotide == 'A' %}A{% elif nucleotide == 'T' %}T{% elif nucleotide == 'C' %}C{% elif nucleotide == 'G' %}G{% endif %}">{{ nucleotide }}</span>
+            {% endfor %}
+          </td>
+          <td>{{ row.population }}</td>
+          <td>{{ row.frequency }}</td>
+          <td>{{ row.num_called }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    No sequence data available.
+  {% endif %}
+</div>
+<br><br>
+
+
+
+
+
+
+
+
+
+
 	  {% if mut_data != None %}
       <button class="collapsible">Mutation and constraint</button>
       <div class="content">
@@ -163,53 +240,6 @@ table.tables1 {
 	See the <a href="/about">about page</a> for detailed description of each parameter.
       </div>
 	    {% endif %}
-<!--
- <br><br>
-
-
-          {% if seq_data != None %}
-      <button class="collapsible">Sequence Data</button>
-      <div class="content">
-
-        <table border="1" cellpadding="5" cellspacing="5" class="tablesorter tablesorter-default">
-          <thead class="tablesorter-header"><th>Parameter</th><th>Value</th></thead>
-          <tbody>
-          <tr>
-              <td><b>ID</b></td>
-              <td>{{ '%.2e' % seq_data[0]|float }}</td>
-            </tr>
-            <tr>
-              <td><b>Population</b></td>
-              <td>{{ seq_data[1] }}</td>
-            </tr>
-            <tr>
-              <td><b>n_effective</b></td>
-              <td>{{ '%.3f' % seq_data[2]|float }}</td>
-            </tr>
-            <tr>
-              <td><b>Frequency</b></td>
-              <td>{{ '%.3f' % seq_data[3]|float }}</td>
-            </tr>
-            <tr>
-              <td><b>Het</b></td>
-              <td>{{ '%.3f' % seq_data[4]|float }}</td>
-            </tr>
-            <tr>
-              <td><b>Num_called</b></td>
-              <td>{{ '%.3f' % seq_data[5]|float }}</td>
-            </tr>
-            <tr>
-              <td><b>Repeat_id</b></td>
-              <td>{{ '%.3f' % seq_data[6]|float }}</td>
-            </tr>
-            <tr>
-              <td><b>Sequence</b></td>
-              <td>{{  seq_data[7] }}</td>
-          </tbody>
-        </table>
-      </div>
-            {% endif %}
-    end comment-->
       <br><br>
 	  {% if imp_data  != None %}
       <button class="collapsible">STR Imputation</button>
