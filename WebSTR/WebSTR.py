@@ -42,6 +42,26 @@ else:
 server = Flask(__name__)
 server.secret_key = 'dbSTR' 
 
+
+################# Motif complement ###################
+def motif_complement(motif):
+    #define new string
+    comp_string = "/"
+    for nuc in motif:
+        if nuc == "A":
+            comp_string +="T"
+        elif nuc == "T":
+            comp_string +="A"
+        elif nuc == "C":
+            comp_string +="G"
+        elif nuc == "G":
+            comp_string +="C"
+        else:
+            comp_string +="-"
+    return motif + comp_string
+ 
+
+
 #################### Render locus page ###############
 #app = dash.Dash(__name__, server=server, url_base_pathname='/dashapp')
 #app.config['suppress_callback_exceptions']=True
@@ -152,6 +172,8 @@ def locusview():
         if freq_dist:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
         seq_data = GetSeqDataAPI(str_query)
+
+    update_motif = motif_complement(motif)
   
     
     if len(mut_data) != 1: mut_data = None
@@ -171,7 +193,7 @@ def locusview():
                            graphJSONx=plotly_plot_json_datab,graphlayoutx=plotly_plot_json_layoutb, 
                            chrom=chrom.replace("chr",""), start=start, end=end, strseq=seq,
                            gene_name=gene_name, gene_desc=gene_desc,
-                           estr=gtex_data, mut_data=mut_data, motif=motif, copies=copies, crc_data = crc_data,
+                           estr=gtex_data, mut_data=mut_data, motif=update_motif, copies=copies, crc_data = crc_data,
                            imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist, seq_data = seq_data)
 
 #################### Render HTML pages ###############
