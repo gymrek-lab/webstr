@@ -125,73 +125,58 @@ table.tables1 {
 
 
 
-
 <button class="collapsible">Sequence Data</button>
 <div class="content">
   {% if seq_data|length > 0 %}
-    <!--Print seq_data -->
-    <pre>{{ seq_data | tojson(indent=2) }}</pre>
-
     <style>
       .tablesorter td {
         font-size: 14px;
       }
-
       .tablesorter td.sequence-column {
-        font-size: 16px; 
+        font-size: 16px;
       }
-
-      .color-A {
-        color: red;
-      }
-
-      .color-T {
-        color: blue;
-      }
-
-      .color-C {
-        color: darkorange;
-      }
-
-      .color-G {
-        color: green;
-      }
-
-      .sequence-column {
-        width: 30%;
-      }
+      .color-A { color: red; }
+      .color-T { color: blue; }
+      .color-C { color: darkorange; }
+      .color-G { color: green; }
+      .sequence-column { width: 30%; }
     </style>
-
     <table border="1" cellpadding="5" cellspacing="5" class="tablesorter tablesorter-default">
       <thead class="tablesorter-header">
         <tr>
           <th class="sequence-column">Sequence</th>
-          <th>Population</th>
-          <th>Frequency</th>
+          <th>AFR</th>
+          <th>AMR</th>
+          <th>EAS</th>
+          <th>EUR</th>
+          <th>SAS</th>
           <th>Number Called</th>
         </tr>
       </thead>
-      {% for row in seq_data %}
+      <tbody>
+        {% for row in seq_data %}
         <tr>
           <td class="sequence-column">
             {% for nucleotide in row.sequence %}
               <span class="color-{% if nucleotide == 'A' %}A{% elif nucleotide == 'T' %}T{% elif nucleotide == 'C' %}C{% elif nucleotide == 'G' %}G{% endif %}">{{ nucleotide }}</span>
             {% endfor %}
           </td>
-          <td>{{ row.population }}</td>
-          <td>{{ row.frequency }}</td>
+          <td>{% if row.population == 'AFR' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
+          <td>{% if row.population == 'AMR' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
+          <td>{% if row.population == 'EAS' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
+          <td>{% if row.population == 'EUR' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
+          <td>{% if row.population == 'SAS' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
           <td>{{ row.num_called }}</td>
         </tr>
-      {% endfor %}
+        {% endfor %}
+      </tbody>
     </table>
   {% else %}
     No sequence data available.
   {% endif %}
 </div>
+
 <br><br>
-
-
-
 
 
 

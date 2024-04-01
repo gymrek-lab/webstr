@@ -46,19 +46,22 @@ server.secret_key = 'dbSTR'
 ################# Motif complement ###################
 def motif_complement(motif):
     #define new string
-    comp_string = "/"
-    for nuc in motif:
+    rev_comp = ""
+    for nuc in reversed(motif):
         if nuc == "A":
-            comp_string +="T"
+            rev_comp +="T"
         elif nuc == "T":
-            comp_string +="A"
+            rev_comp +="A"
         elif nuc == "C":
-            comp_string +="G"
+            rev_comp +="G"
         elif nuc == "G":
-            comp_string +="C"
+            rev_comp +="C"
         else:
-            comp_string +="-"
-    return motif + comp_string
+            rev_comp +="-"
+
+    result = motif +"/"+ rev_comp
+    print(f"Debug: motif={motif}, rev_comp={rev_comp}, result={result}")
+    return result
  
 
 

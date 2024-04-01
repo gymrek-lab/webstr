@@ -108,7 +108,9 @@ def GetSeqDataAPI(repeat_id):
     df = pd.DataFrame.from_records(resp.json())
     seq_data = df.to_dict(orient='records')
     print(df)
-    #pd.DataFrame.from_records(resp.json())
+    #sort by seq and then by pop for table
+    seq_data = sorted(seq_data, key=lambda x: (len(x['sequence']), x['population']))
+
     return seq_data
     
 
