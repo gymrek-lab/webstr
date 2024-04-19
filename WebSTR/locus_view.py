@@ -100,19 +100,36 @@ def GetMutInfo(strid, DbSTRPath):
 
 
 
+
+
 def GetSeqDataAPI(repeat_id):
-    
+   
     seq_url = API_URL + '/allseq/?repeat_id=' + repeat_id
     print(seq_url)
     resp = requests.get(seq_url)
+    
+    # Create a DataFrame from the API response
     df = pd.DataFrame.from_records(resp.json())
-    seq_data = df.to_dict(orient='records')
-    print(df)
-    #sort by seq and then by pop for table
-    seq_data = sorted(seq_data, key=lambda x: (len(x['sequence']), x['population']))
+    
+    # Aggregating frequencies by sequence
+    # This pivots the dataframe to have sequences as rows and populations as columns with frequencies as values
+    agg_df = df.pivot_table(index='sequence', columns='population', values='frequency', aggfunc='first').reset_index()
+    
+    # Fill NaN values with 0 (or any other appropriate value indicating no frequency)
+    agg_df = agg_df.fillna(0)
+    
+    # Convert the aggregated DataFrame back to a dictionary for rendering
+    seq_data = agg_df.to_dict(orient='records')
+    
+    # Optional: If you still want to sort by sequence length and then by a population attribute, you'll need a different approach
+    # since populations are now columns. One way to handle this might be to sort by sequence length directly:
+    seq_data = sorted(seq_data, key=lambda x: len(x['sequence']))
 
     return seq_data
-    
+
+
+
+   
 
 def GetImputationInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()

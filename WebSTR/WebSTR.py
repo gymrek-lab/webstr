@@ -60,7 +60,7 @@ def motif_complement(motif):
             rev_comp +="-"
 
     result = motif +"/"+ rev_comp
-    print(f"Debug: motif={motif}, rev_comp={rev_comp}, result={result}")
+   
     return result
  
 
@@ -236,6 +236,9 @@ def my_method():
 def dbSTRpathogenic():
     return render_template("pathogenic.html")
 
+@server.route('/GWAS')
+def dbSTRGWAS():
+    return render_template("GWAS.html")
 
 @server.errorhandler(404)
 def internal_server_error(error):

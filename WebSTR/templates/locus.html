@@ -123,6 +123,7 @@ table.tables1 {
 	   {% endif %}
       <br><br>
 
+<!-- Allele Sequence Table -->
 
 
 <button class="collapsible">Sequence Data</button>
@@ -133,6 +134,7 @@ table.tables1 {
         font-size: 14px;
       }
       .tablesorter td.sequence-column {
+        font-family: monospace; /* Monospace font for sequences */
         font-size: 16px;
       }
       .color-A { color: red; }
@@ -150,23 +152,21 @@ table.tables1 {
           <th>EAS</th>
           <th>EUR</th>
           <th>SAS</th>
-          <th>Number Called</th>
         </tr>
       </thead>
       <tbody>
         {% for row in seq_data %}
         <tr>
           <td class="sequence-column">
-            {% for nucleotide in row.sequence %}
+            {% for nucleotide in row['sequence'] %}
               <span class="color-{% if nucleotide == 'A' %}A{% elif nucleotide == 'T' %}T{% elif nucleotide == 'C' %}C{% elif nucleotide == 'G' %}G{% endif %}">{{ nucleotide }}</span>
             {% endfor %}
           </td>
-          <td>{% if row.population == 'AFR' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
-          <td>{% if row.population == 'AMR' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
-          <td>{% if row.population == 'EAS' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
-          <td>{% if row.population == 'EUR' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
-          <td>{% if row.population == 'SAS' %} {{ row.frequency }}{% else %}&nbsp;{% endif %}</td>
-          <td>{{ row.num_called }}</td>
+          <td>{{ row.get('AFR', '&nbsp;') }}</td>
+          <td>{{ row.get('AMR', '&nbsp;') }}</td>
+          <td>{{ row.get('EAS', '&nbsp;') }}</td>
+          <td>{{ row.get('EUR', '&nbsp;') }}</td>
+          <td>{{ row.get('SAS', '&nbsp;') }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -175,6 +175,12 @@ table.tables1 {
     No sequence data available.
   {% endif %}
 </div>
+
+
+
+
+<!-- end allele sequence table -->
+
 
 <br><br>
 
