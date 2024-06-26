@@ -181,76 +181,22 @@ table.tables1 {
 
 <!-- end allele sequence table -->
 
-
 <!-- GWAS Trait Table -->
-
 <button class="collapsible">GWAS Trait Associations</button>
+
+<!--
 <div class="content">
-    <div id="gwas-image-container"></div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var collapsible = document.querySelector('.collapsible');
-        collapsible.addEventListener('click', function() {
-            this.classList.toggle('active');
-            var content = this.nextElementSibling;
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
-        });
-
-        //get params
-        function getUrlParams() {
-            var params = {};
-            var parser = document.createElement('a');
-            parser.href = window.location.href;
-            var query = parser.search.substring(1);
-            var vars = query.split('&');
-            vars.forEach(function(v) {
-                var pair = v.split('=');
-                params[pair[0]] = decodeURIComponent(pair[1]);
-            });
-            return params;
-        }
-
-        //fetch image URLs
-        function fetchImageUrls(region, genome) {
-            return fetch(`/get_image_urls?region=${region}&genome=${genome}`)
-                .then(response => response.json());
-        }
-
-        //check cond and populate imgs
-        function populateImages() {
-            var params = getUrlParams();
-            var imageContainer = document.getElementById('gwas-image-container');
-            //clear prev img
-            imageContainer.innerHTML = '';
-            var region = params['repeat_id'];
-            var genome = params['genome'];
-
-            if (region && genome) {
-                fetchImageUrls(region, genome).then(urls => {
-                    urls.forEach(function(url) {
-                        var img = document.createElement('img');
-                        img.src = url;
-                        img.alt = 'GWAS Plot';
-                        img.style.width = '100%'; 
-                        imageContainer.appendChild(img);
-                    });
-                }).catch(error => console.error('Error fetching images:', error));
-            }
-        }
-
-        //populate images if conditions are met
-        populateImages();
-    });
-</script>
-
+    <div id="gwas-image-container">
+        {% if images %}
+            {% for image in images %}
+                <img src="{{ image }}" alt="GWAS Plot" style="width: 50%; display: block; margin-left: auto; margin-right: auto;">
+        {% endfor %}
+        {% else %}
+            <p>No GWAS trait associations available for this region.</p>
+        {% endif %}
+    </div>
+</div> -->
 <!-- end GWAS trait table -->
-
 
 
 <br><br>
