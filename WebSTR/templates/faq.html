@@ -31,7 +31,14 @@ We consider repeats with motif lengths between 1-6bp. E.g. AAAAA, ACACACACAC, CA
                 the reference genome and to further genotype repeat variations. Due to the statistical nature of these pipelines and filters used at the different stages of the analysis (for instance 
                 excluding overlapping repeats) an important loci could have been filtered out. In this case we aim to manually update important missing loci, so please contact us if you find
                 such a case. 
-     
+            </p>
+            <h4 class="media-heading">How do you handle STRs with multiple/complex motifs such as that found in HTT (CTG-CAG) loci
+               or motif variation (such as the many motifs known at RFC1)?
+            </h4>
+            <p>
+                We currently report only one motif for such STRs and it is a consensus motif based on the reference genome. This current limitation in WebSTR
+                is due to the differences in how repeat motifs are handled by different genotyping tools. WebSTR reports STRs genotyped by
+                many different tools and we for now have taken a decision to simplify this aspect of reporting, but plan to improve this in the future. 
             </p>
 
           <h4 class="media-heading">Does WebSTR display allele frequency information?</h4>

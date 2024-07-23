@@ -1,0 +1,33 @@
+{
+    "configurations": [
+        {
+            "name": "Python: WebSTR.py from DevContainer",
+            "type": "python",
+            "request": "launch",
+            "program": "WebSTR.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/WebSTR",
+            "env": {
+                "FLASK_DEBUG": "1",
+                "WEBSTR_API_URL": "http://host.docker.internal:5000",
+                "FLASK_PORT": "5001"
+            },
+            "justMyCode": true
+        },
+        {
+            "name": "Docker: Python - Flask",
+            "type": "docker",
+            "request": "launch",
+            "preLaunchTask": "docker-run: debug",
+            "python": {
+                "pathMappings": [
+                    {
+                        "localRoot": "${workspaceFolder}",
+                        "remoteRoot": "/app"
+                    }
+                ],
+                "projectType": "flask",
+            }
+        }
+    ]
+}

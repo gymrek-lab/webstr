@@ -26,7 +26,7 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
     
-    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='typeahead.bundle.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='plotly-2.16.1.min.js') }}"></script>
     <!--tablesorter's css-->
@@ -47,6 +47,7 @@
         ga('create', 'UA-55729303-1', 'auto');
         ga('send', 'pageview');
     </script>
+
     <script type="text/javascript">
         number_of_samples = 60706;
         release_number = 0.3;
@@ -80,6 +81,7 @@
             });
         });
     </script>
+    
 <style>
 .bg-image { 
   /* The image used */
@@ -152,11 +154,17 @@ table {
       
         <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0 bg-dark py-2">
-            <li class="nav-item"><a class="nav-link" href="/about" class="text-white">About</a></li>
-            <li class="nav-item"><a class="nav-link" href="/downloads" class="text-white">Downloads</a></li>
-            <li class="nav-item"><a class="nav-link" href="/terms" class="text-white">Terms</a></li>
+            <li class="nav-item"><a class="nav-link"  href="/about" class="text-white">About</a></li>
+            <li class="nav-item"><a class="nav-link"  href="/downloads" class="text-white">Downloads</a></li>
+            <li class="nav-item"><a class="nav-link"  href="/terms" class="text-white">Terms</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"  href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"  class="text-white">Research</a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <a class="dropdown-item"  href="/crc_research" class="text-white">Sinergia-CRC repeats</a>
+              </div>
+            </li>
             <li class="nav-item "><a class="nav-link" href="/contact" class="text-white">Contact</a></li>
-            <li class="nav-item"><a class="nav-link" href="/faq" class="text-white">FAQ</a></li>
+            <li class="nav-item"><a class="nav-link"  href="/faq" class="text-white">FAQ</a></li>
         </ul>
           
           <form action="/search" class="form-inline my-2 my-lg-0" role="search">

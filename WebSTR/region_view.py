@@ -1,4 +1,5 @@
 import json
+import os
 import requests
 import pandas as pd
 import numpy as np
@@ -13,12 +14,18 @@ GENEBUFFER = 0.1
 EXON_WIDTH = 0.3
 GENE_WIDTH = 0.03
 GENE_COLOR = "black"
-#API_URL = 'http://webstr-api.ucsd.edu'
-API_URL = 'http://0.0.0.0:5000'
+API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+#API_URL = 'http://0.0.0.0:5000'
 
 def GetRegionData(region_query, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     colpos = region_query.find(":")
+    
+    # This is to enable searching for the region starting with chr as well as just the number
+    chromosome = region_query.find("CHR")
+    if (chromosome == 0):
+        region_query = region_query.replace("CHR","")
+
     genebuf = 0.1 # increase region width by this much
     df_hg19 = pd.DataFrame({})
    
@@ -76,6 +83,11 @@ def GetRegionDataAPI(region_query):
     
     colpos = region_query.find(":")
     ensemblid = region_query.find("ENSG")
+    
+    # This is to enable searching for the region starting with chr as well as just the number
+    chromosome = region_query.find("CHR")
+    if (chromosome == 0):
+        region_query = region_query.replace("CHR","") 
     #genebuf = 0.1 # increase region width by this much
    
     df_hg38 = pd.DataFrame({})

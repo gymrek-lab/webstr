@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<!-- Div for the plotly chart -->
+<div id="chart" class="chart"></div>
+
+<style>
+mark.red {
+    color:#ff0000;
+    background: white;}
+mark.gray {
+    color:gray;
+    background: white;}
+mark.gold {
+    color:gold;
+    background: white;}
+mark.blue {
+    color:blue;
+    background: white;}
+mark.purple {
+    color:purple;
+    background: white;}
+mark.green {
+    color:green;
+    background: white;}
+
+.iframe_wrap {  left:0; width:100%;  height:650px; }
+.iframe_wrap iframe { display: block; width:100%; height:100%; border: none; }
+
+</style>
+
+<div id="plotLegend" class="plotfooter"></div>
+
+<!-- Main table of STRs in this region -->
+
+<div class="container container-lg">
+  <div class="row justify-content-center">
+
+    <h4>  Sinergia-CRC (TCGA cohort) Panel - gangstr_crc_hg38 (Manuscript in preparation) </h4>
+  
+    <p> For this reference panel we used statistical framework TRAL to find 1,5 mln STRs in the human reference genome located in the proximity of
+      genes (promoter, exon and intron regions). 
+      The Sinergia-CRC repeats have then been genotyped using GangSTR on more than 400 genomes from patients with 
+      colorectal cancer available to us through the TCGA consortium. This project is part of a larger effort 
+      <a href="https://www.zhaw.ch/en/research/research-database/project-detailview/projektid/4244/">
+      "Trans-omic approach to colorectal cancer: an integrative computational and clinical perspective"
+       </a> funded by a <a href="https://www.snf.ch/en/HzVMPWm96mz69ZJ8/funding/programmes/sinergia"></a> SNSF Sinergia grant.</a>
+     </p>
+  
+     <p>
+     Cohort-level summary statistics describing locus-level patterns of genetic
+      variation is stored in the WebSTR database and is publicly available for each STR.
+    The following parameters can be accessed:  
+     <ul>
+      <li><b>avg_size_diff</b>: the average amount of repeat units difference that was found for this locus between healthy and tumor sample</li>
+      <li><b>total_calls</b>: the total number of patients where the locus was called in both the healthy and tumor sample.</li>
+      <li><b>frac_variable</b>: the fraction of patients where a difference in repeat size was observed between healthy and tumor for this locus. Calculated by dividing the number of patients with variable loci by total_calls</li>
+    </ul>
+      Patient-level length variation data of each STR is controlled and available only upon approval from the 
+      TCGA consortium as it can potentially be used to identify the patient. 
+    </p>
+
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-12">
+      <div class="iframe_wrap">
+        <iframe src="/dash" title="W3Schools Free Online Web Tutorials"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

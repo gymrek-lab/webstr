@@ -2,7 +2,9 @@
 """
 WebSTR database application
 """
-
+import logging
+import sys
+import os
 import argparse
 #import dash
 from flask import Flask, redirect, render_template, request, session, url_for
@@ -11,13 +13,16 @@ from collections import deque
 import pandas as pd
 import numpy as npa
 import json
+
 from textwrap import dedent as d
-import sys
-import os
 
 #from locus_view_dash import *
 from locus_view import *
 from region_view import *
+
+from dash_graphs import add_dash_graphs_to_flask_server
+
+API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 
 #################### Database paths ###############
 PLATFORM = "snorlax" # or AWS
@@ -41,6 +46,7 @@ else:
 #################### Set up flask server ###############
 server = Flask(__name__)
 server.secret_key = 'dbSTR' 
+add_dash_graphs_to_flask_server(server)
 
 
 ################# Motif complement ###################
@@ -91,7 +97,7 @@ def search():
     region_queryGenome = request.args.get('genome')
     region_queryOrg = request.args.get('query')
     region_query = region_queryOrg.upper()
-
+    
     if (region_queryGenome == 'hg19'):
         region_data = GetRegionData(region_query, DbSTRPath)
         
@@ -199,6 +205,8 @@ def locusview():
                            estr=gtex_data, mut_data=mut_data, motif=update_motif, copies=copies, crc_data = crc_data,
                            imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist, seq_data = seq_data)
 
+
+
 #################### Render HTML pages ###############
 @server.route('/')
 @server.route('/dbSTR')
@@ -249,17 +257,31 @@ def internal_server_error(error):
 def unhandled_exception(e):
     server.logger.error('Unhandled Exception: %s', (e))
     return render_template('500.html', emsg = e), 500
+
+@server.route('/crc_research')
+def graphs():
+    
+    return render_template("crc_research.html", api_url = API_URL)
  
 
 #################### Set up and run the server ###############
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument("--host", help="Host to run app", type=str, default="0.0.0.0")
-    parser.add_argument("--port", help="Port to run app", type=int, default=5000)
+    parser.add_argument("--port", help="Port to run app", type=int, default=int(os.environ.get("FLASK_PORT", "5000"))) 
     parser.add_argument("--ref-hg38", help="Address to hg38 ref genome", type=str, default="/storage/resources/dbase/human/hg38/hg38.fa")
     parser.add_argument("--ref-hg19", help="Address to hg19 ref genome", type=str, default="/storage/resources/dbase/human/hg19/hg19.fa")
+
     args = parser.parse_args()
-    server.run(debug=False, host=args.host, port=args.port)
+
+    # FLASK_DEBUG is not mandatory but can be handy to configure debugging in a container
+    FLASK_DEBUG = os.environ.get("FLASK_DEBUG", 0) == "1"
+    if FLASK_DEBUG:
+        server.config.update(
+            TEMPLATES_AUTO_RELOAD=True
+        )
+    server.run(debug = FLASK_DEBUG, host=args.host, port=args.port)
 
 if __name__ == '__main__':
     main()
+ 
