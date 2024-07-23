@@ -48,6 +48,29 @@ server = Flask(__name__)
 server.secret_key = 'dbSTR' 
 add_dash_graphs_to_flask_server(server)
 
+
+################# Motif complement ###################
+def motif_complement(motif):
+    #define new string
+    rev_comp = ""
+    for nuc in reversed(motif):
+        if nuc == "A":
+            rev_comp +="T"
+        elif nuc == "T":
+            rev_comp +="A"
+        elif nuc == "C":
+            rev_comp +="G"
+        elif nuc == "G":
+            rev_comp +="C"
+        else:
+            rev_comp +="-"
+
+    result = motif +"/"+ rev_comp
+   
+    return result
+ 
+
+
 #################### Render locus page ###############
 #app = dash.Dash(__name__, server=server, url_base_pathname='/dashapp')
 #app.config['suppress_callback_exceptions']=True
@@ -126,6 +149,7 @@ def locusview():
     str_query = request.args.get('repeat_id')
     genome_query = request.args.get('genome')
     mut_data = []
+    seq_data = []
     imp_data = []
     gtex_data = []
     imp_allele_data = []
@@ -156,7 +180,11 @@ def locusview():
         freq_dist = GetFreqSTRInfoAPI(str_query)
         if freq_dist:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
-        
+        seq_data = GetSeqDataAPI(str_query)
+
+    update_motif = motif_complement(motif)
+  
+    
     if len(mut_data) != 1: mut_data = None
     else:
         mut_data = list(mut_data[0])
@@ -174,8 +202,8 @@ def locusview():
                            graphJSONx=plotly_plot_json_datab,graphlayoutx=plotly_plot_json_layoutb, 
                            chrom=chrom.replace("chr",""), start=start, end=end, strseq=seq,
                            gene_name=gene_name, gene_desc=gene_desc,
-                           estr=gtex_data, mut_data=mut_data, motif=motif, copies=copies, crc_data = crc_data,
-                           imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist)
+                           estr=gtex_data, mut_data=mut_data, motif=update_motif, copies=copies, crc_data = crc_data,
+                           imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist, seq_data = seq_data)
 
 
 
@@ -216,6 +244,9 @@ def my_method():
 def dbSTRpathogenic():
     return render_template("pathogenic.html")
 
+@server.route('/GWAS')
+def dbSTRGWAS():
+    return render_template("GWAS.html")
 
 @server.errorhandler(404)
 def internal_server_error(error):

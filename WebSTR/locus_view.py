@@ -4,9 +4,12 @@ import pyfaidx
 import requests
 import json
 import numpy as np
+import pandas as pd
+
 
 seqbuf = 120
 seqbreakline = 100
+
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 #API_URL = 'http://0.0.0.0:5000'
 
@@ -98,6 +101,39 @@ def GetMutInfo(strid, DbSTRPath):
               " from mutrates mut where mut.str_id = '{}'").format(strid)
     df = ct.execute(gquery).fetchall()
     return df
+
+
+
+
+
+def GetSeqDataAPI(repeat_id):
+   
+    seq_url = API_URL + '/allseq/?repeat_id=' + repeat_id
+    print(seq_url)
+    resp = requests.get(seq_url)
+    
+    # Create a DataFrame from the API response
+    df = pd.DataFrame.from_records(resp.json())
+    
+    # Aggregating frequencies by sequence
+    # This pivots the dataframe to have sequences as rows and populations as columns with frequencies as values
+    agg_df = df.pivot_table(index='sequence', columns='population', values='frequency', aggfunc='first').reset_index()
+    
+    # Fill NaN values with 0 (or any other appropriate value indicating no frequency)
+    agg_df = agg_df.fillna(0)
+    
+    # Convert the aggregated DataFrame back to a dictionary for rendering
+    seq_data = agg_df.to_dict(orient='records')
+    
+    # Optional: If you still want to sort by sequence length and then by a population attribute, you'll need a different approach
+    # since populations are now columns. One way to handle this might be to sort by sequence length directly:
+    seq_data = sorted(seq_data, key=lambda x: len(x['sequence']))
+
+    return seq_data
+
+
+
+   
 
 def GetImputationInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
