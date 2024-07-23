@@ -7,7 +7,7 @@ import sys
 import os
 import argparse
 #import dash
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, redirect, render_template, request, session, url_for, jsonify
 #from dash.dependencies import Output, Input, State
 from collections import deque
 import pandas as pd
@@ -47,6 +47,15 @@ else:
 server = Flask(__name__)
 server.secret_key = 'dbSTR' 
 add_dash_graphs_to_flask_server(server)
+
+   ##images for GWAS##
+df = pd.read_csv('pop_plot.csv')
+
+#df to a dictionary for quick lookups
+image_mappings = {}
+for index, row in df.iterrows():
+    image_mappings[row['hg38_id']] = [row['image1'], row['image2']]
+    image_mappings[row['hg19_id']] = [row['image1'], row['image2']]
 
 
 ################# Motif complement ###################
@@ -89,6 +98,16 @@ def motif_complement(motif):
 #@app.callback(Output('Main-graphic','figure'),
 #              [Input('table2','rows')])
 #def main_update_figure(rows): return update_figure(rows)
+
+#################### Render locus page ###############
+@server.route('/get_images', methods=['GET'])
+def get_images():
+    region = request.args.get('region')
+    if region in image_mappings:
+        return jsonify(image_mappings[region])
+    else:
+        return jsonify([]), 404
+
 
 #################### Render region page ###############
 
