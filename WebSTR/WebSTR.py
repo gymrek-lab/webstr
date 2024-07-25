@@ -2,43 +2,29 @@
 """
 WebSTR database application
 """
-import logging
+
 import sys
 import os
 import argparse
-#import dash
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify
-#from dash.dependencies import Output, Input, State
-from collections import deque
 import pandas as pd
-import numpy as npa
-import json
+import numpy as np
+from utils import motif_complement
 
-from textwrap import dedent as d
-
-#from locus_view_dash import *
 from locus_view import *
 from region_view import *
 
-from dash_graphs import add_dash_graphs_to_flask_server
+#from dash_graphs import add_dash_graphs_to_flask_server
 
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 
 #################### Database paths ###############
 PLATFORM = "snorlax" # or AWS
 BASEPATH =  "/storage/resources/dbase/human/"
-#os.environ['DATAPATH']
 if PLATFORM == "snorlax":
-    #BasePath = "/storage/resources/dbase/dbSTR/SS1/" # TODO this is allele freq. not used now
-    #DbSTRPath = "/storage/resources/dbase/dbSTR/"
-    #RefFaPath_hg19 = "/storage/resources/dbase/human/hg19/hg19.fa"
     DbSTRPath = BASEPATH
     RefFaPath_hg19 = BASEPATH + "hg19/hg19.fa"
     RefFaPath_hg38 = BASEPATH + "hg38/hg38.fa"
-elif PLATFORM == "AWS":
-    #BasePath = ""
-    DbSTRPath = ""
-    RefFaPath_hg19 = "" # TODO
 else:
     sys.stderr.write("Could not locate database files\n")
     sys.exit(1)
@@ -46,69 +32,8 @@ else:
 #################### Set up flask server ###############
 server = Flask(__name__)
 server.secret_key = 'dbSTR' 
-add_dash_graphs_to_flask_server(server)
-
-   ##images for GWAS##
-df = pd.read_csv('pop_plot.csv')
-
-#df to a dictionary for quick lookups
-image_mappings = {}
-for index, row in df.iterrows():
-    image_mappings[row['hg38_id']] = [row['image1'], row['image2']]
-    image_mappings[row['hg19_id']] = [row['image1'], row['image2']]
-
-
-################# Motif complement ###################
-def motif_complement(motif):
-    #define new string
-    rev_comp = ""
-    for nuc in reversed(motif):
-        if nuc == "A":
-            rev_comp +="T"
-        elif nuc == "T":
-            rev_comp +="A"
-        elif nuc == "C":
-            rev_comp +="G"
-        elif nuc == "G":
-            rev_comp +="C"
-        else:
-            rev_comp +="-"
-
-    result = motif +"/"+ rev_comp
-   
-    return result
+#add_dash_graphs_to_flask_server(server)
  
-
-
-#################### Render locus page ###############
-#app = dash.Dash(__name__, server=server, url_base_pathname='/dashapp')
-#app.config['suppress_callback_exceptions']=True
-#SetupDashApp(app)
-#
-#@app.callback(dash.dependencies.Output('field-dropdown','value'),
-#              [dash.dependencies.Input('url', 'href')])
-#def main_display_page(href): return display_page(href)
-#
-#@app.callback(Output('table2', 'rows'), [Input('field-dropdown', 'value')])
-#def main_update_table(user_selection): return update_table(user_selection, BasePath)
-#
-#@app.callback(Output('STRtable', 'rows'), [Input('field-dropdown', 'value')])
-#def main_getdata(user_selection): return getdata(user_selection, BasePath)
-#
-#@app.callback(Output('Main-graphic','figure'),
-#              [Input('table2','rows')])
-#def main_update_figure(rows): return update_figure(rows)
-
-#################### Render locus page ###############
-@server.route('/get_images', methods=['GET'])
-def get_images():
-    region = request.args.get('region')
-    if region in image_mappings:
-        return jsonify(image_mappings[region])
-    else:
-        return jsonify([]), 404
-
-
 #################### Render region page ###############
 
 @server.route('/search')
@@ -162,7 +87,7 @@ def search():
             return render_template('view2_nolocus.html')
 
 
-
+#################### Render locus page ###############
 @server.route('/locus')
 def locusview():
     str_query = request.args.get('repeat_id')
@@ -202,7 +127,6 @@ def locusview():
         seq_data = GetSeqDataAPI(str_query)
 
     update_motif = motif_complement(motif)
-  
     
     if len(mut_data) != 1: mut_data = None
     else:
@@ -216,15 +140,12 @@ def locusview():
     if len(crc_data) == 0: crc_data = None
     if len(imp_allele_data) == 0: imp_allele_data = None
 
-    
     return render_template('locus.html', strid=str_query,
                            graphJSONx=plotly_plot_json_datab,graphlayoutx=plotly_plot_json_layoutb, 
                            chrom=chrom.replace("chr",""), start=start, end=end, strseq=seq,
                            gene_name=gene_name, gene_desc=gene_desc,
                            estr=gtex_data, mut_data=mut_data, motif=update_motif, copies=copies, crc_data = crc_data,
                            imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist, seq_data = seq_data)
-
-
 
 #################### Render HTML pages ###############
 @server.route('/')
@@ -257,7 +178,7 @@ def my_method():
     try:
         call_method_that_raises_exception()
     except Exception as e:
-            render_template("500.html", error= str(e))
+        render_template("500.html", error= str(e))
 
 @server.route('/pathogenic')
 def dbSTRpathogenic():
@@ -278,11 +199,9 @@ def unhandled_exception(e):
     return render_template('500.html', emsg = e), 500
 
 @server.route('/crc_research')
-def graphs():
-    
+def graphs():    
     return render_template("crc_research.html", api_url = API_URL)
  
-
 #################### Set up and run the server ###############
 def main():
     parser = argparse.ArgumentParser(__doc__)
