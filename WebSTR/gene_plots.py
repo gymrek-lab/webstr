@@ -88,19 +88,15 @@ def GetSTRColor(period):
         return "black"
 
 def GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes):
-    # Draw gene info
-    region_data2 = region_data
-    
-    #chrom = region_data2["chrom"].values[0].replace("chr","")
-    chr = region_data2["chr"].values[0].replace("chr","")
+    chrom = region_data["chr"].values[0].replace("chr","")
     
     # Get points for each STR
     trace1 = go.Scatter(
-        x = (region_data2["start"]+region_data2["end"])/2,
-        y = [0]*region_data2.shape[0],
+        x = (region_data["start"]+region_data["end"])/2,
+        y = [0]*region_data.shape[0],
         mode="markers",
-        marker=dict(size=10, color=region_data2["period"].apply(lambda x: GetSTRColor(x)), line=dict(width=2)),
-        text=region_data2.apply(lambda x: x["chr"]+":"+str(x["start"]) + " ("+x["motif"]+")", 1),
+        marker=dict(size=10, color=region_data["period"].apply(lambda x: GetSTRColor(x)), line=dict(width=2)),
+        text=region_data.apply(lambda x: x["chr"]+":"+str(x["start"]) + " ("+x["motif"]+")", 1),
         hoverinfo='text'
     )
     plotly_data = [trace1, gene_trace]
@@ -108,10 +104,9 @@ def GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes):
         height=300+50*numgenes,
         hovermode= 'closest',
         showlegend= False,
-        #legend=dict(orientation="h"),
         shapes=gene_shapes,
         xaxis=dict(
-            title="Position (chr%s)"%chr ,
+            title="Position (chr%s)"%chrom ,
             autorange=True,
             showgrid=False,
             zeroline=False,
