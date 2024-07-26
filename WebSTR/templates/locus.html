@@ -128,7 +128,7 @@ table.tables1 {
 
 <button class="collapsible">Sequence Data</button>
 <div class="content">
-  {% if seq_data|length > 0 %}
+  {% if seq_data != None %}
     <style>
       .tablesorter td {
         font-size: 14px;
@@ -181,31 +181,8 @@ table.tables1 {
 
 <!-- end allele sequence table -->
 
-<!-- GWAS Trait Table -->
-<button class="collapsible">GWAS Trait Associations</button>
-
-<!--
-<div class="content">
-    <div id="gwas-image-container">
-        {% if images %}
-            {% for image in images %}
-                <img src="{{ image }}" alt="GWAS Plot" style="width: 50%; display: block; margin-left: auto; margin-right: auto;">
-        {% endfor %}
-        {% else %}
-            <p>No GWAS trait associations available for this region.</p>
-        {% endif %}
-    </div>
-</div> -->
-<!-- end GWAS trait table -->
-
 
 <br><br>
-
-
-
-
-
-
 
 	  {% if mut_data != None %}
       <button class="collapsible">Mutation and constraint</button>

@@ -1,16 +1,35 @@
 import os
 from dbutils import *
+from utils import *
 import pyfaidx
 import requests
 import json
 import numpy as np
 import pandas as pd
+import plotly
+import plotly.graph_objs as go
 
+API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 
 seqbuf = 120
 seqbreakline = 100
 
-API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+def GetSTRInfo(str_query, genome_query, dbSTRPath, reffa):
+    if genome_query is None or genome_query == "hg19":
+        strinfo = GetSTRMetadataHg19(str_query, dbSTRPath)
+    else:
+        strinfo = GetSTRMetadataAPI(str_query)
+    if strinfo is None: return None
+    chrom = strinfo["chrom"]
+    start = strinfo["start"]
+    end = strinfo["end"]
+    lflank = str(reffa[chrom][start-seqbuf:start]).upper()
+    strseq = str(reffa[chrom][start:end]).upper()
+    rflank = str(reffa[chrom][end:end+seqbuf]).upper()
+    strinfo["chrom"] = strinfo["chrom"].replace("chr","")
+    strinfo["seq"] = GetSTRSeqHTML(lflank,strseq,rflank)
+    strinfo["motif"] = motif_complement(strinfo["motif"])
+    return strinfo
 
 def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
     ret = '<font size="3" color="black">...'
@@ -34,50 +53,48 @@ def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
     ret += "</font>..."
     return ret
 
-def GetSTRInfo(strid, DbSTRPath, reffa):
+def GetSTRMetadataHg19(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     squery = ("select str.chrom, str.start, str.end,str.motif, (str.end-str.start+1)/str.period copies from strlocmotif str where str.strid = '{}'").format(strid)
     df = ct.execute(squery).fetchall()
-    if len(df) == 0: return None, None, None, None
-    chrom = df[0][0]
-    start = int(df[0][1])
-    end = int(df[0][2])
-    motif = df[0][3]
-    copies = df[0][4]
-    lflank = str(reffa[chrom][start-seqbuf:start]).upper()
-    strseq = str(reffa[chrom][start:end]).upper()
-    rflank = str(reffa[chrom][end:end+seqbuf]).upper()
-    seq = GetSTRSeqHTML(lflank,strseq,rflank)
-    return chrom, start, end, motif, copies, seq
+    if len(df) == 0: return None
+    return {"chrom": df[0][0],
+            "start": df[0][1],
+            "end": df[0][2],
+            "motif": df[0][3],
+            "copies": df[0][4],
+            "gene_name": "",
+            "gene_desc": "",
+            "crc_data": None,
+            "gtex_data": GetGTExInfo(strid, DbSTRPath),
+            "mut_data": GetMutInfo(strid, DbSTRPath),
+            "imp_data": GetImputationInfo(strid, DbSTRPath),
+            "imp_allele_data": GetImputationAlleleInfo(strid, DbSTRPath),
+            "seq_data": []
+    }
 
-def GetSTRInfoAPI(repeat_id, reffa):
-    
+def GetSTRMetadataAPI(repeat_id):
     repeat_url = API_URL + '/repeatinfo/?repeat_id=' + repeat_id 
-    
     resp = requests.get(repeat_url)
     repeat = json.loads(resp.text)
-
-
-    #if len(df) == 0: return None, None, None, None
-    chrom = repeat['chr']
-    start =  repeat['start']
-    end = repeat['end']
-    motif = repeat['motif']
-    copies = repeat['copies']
-    gene_name = repeat['gene_name']
-    gene_desc = repeat['gene_desc']
-    crc_data = []
-    if repeat['total_calls'] is not None:
-        crc_data = [repeat['total_calls'], repeat['frac_variable'], repeat['avg_size_diff']]
-
-
-    lflank = str(reffa[chrom][start-seqbuf:start]).upper()
-    strseq = str(reffa[chrom][start-1:end]).upper()
-    rflank = str(reffa[chrom][end:end+seqbuf]).upper()
-    seq = GetSTRSeqHTML(lflank,strseq,rflank)
-    return chrom, start, end, seq, gene_name, gene_desc, motif, copies, crc_data
-
-
+    strinfo = {
+        "chrom": repeat["chr"],
+        "start": repeat["start"],
+        "end": repeat["end"],
+        "motif": repeat["motif"],
+        "copies": repeat["copies"],
+        "gene_name": repeat["gene_name"],
+        "gene_desc": repeat["gene_desc"],
+        "crc_data": None,
+        "gtex_data": None,
+        "mut_data": None,
+        "imp_data": None,
+        "imp_allele_data": None,
+        "seq_data": GetSeqDataAPI(repeat_id)
+    }
+    if repeat["total_calls"] is not None:
+        strinfo["crc_data"] = [repeat['total_calls'], repeat['frac_variable'], repeat['avg_size_diff']]
+    return strinfo
 
 def GetGTExInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
@@ -99,14 +116,19 @@ def GetMutInfo(strid, DbSTRPath):
     gquery = ("select mut.est_logmu_ml, mut.est_beta_ml, mut.est_pgeom_ml, mut.up, mut.down, mut.p, mut.zscore_1, mut.zscore_2"
               " from mutrates mut where mut.str_id = '{}'").format(strid)
     df = ct.execute(gquery).fetchall()
-    return df
+    if len(df) != 1:
+        return None
+    else:
+        df = list(df[0])
+        df[0] = 10**df[0]
+        return df
 
 
 
 
 
 def GetSeqDataAPI(repeat_id):
-   
+    return None # TODO
     seq_url = API_URL + '/allseq/?repeat_id=' + repeat_id
     print(seq_url)
     resp = requests.get(seq_url)
@@ -130,19 +152,18 @@ def GetSeqDataAPI(repeat_id):
 
     return seq_data
 
-
-
-   
-
 def GetImputationInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     gquery = ("select imp.loo_concordance,imp.loo_r,imp.wgs_eur_concordance,imp.wgs_eur_r,imp.wgs_afr_concordance,imp.wgs_afr_r,"
               " imp.wgs_eas_concordance,imp.wgs_eas_r"
               " from locstat imp where imp.str_id = '{}'").format(strid)
     df = ct.execute(gquery).fetchall()
-    return df
+    if len(df) != 1:
+        return None
+    else:
+        return list(df[0])
 
-def GetFreqSTRInfo(strid,DbSTRPath):
+def GetFreqSTRInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     gquery = ("select cohort_id, (end-start+1+af.length)/period copies,sum(nvals) nvals from"
               " allelefreq af,"

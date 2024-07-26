@@ -9,7 +9,6 @@ import argparse
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify
 import pandas as pd
 import numpy as np
-from utils import motif_complement
 
 from locus_view import *
 from region_view import *
@@ -56,62 +55,40 @@ def search():
 def locusview():
     str_query = request.args.get('repeat_id')
     genome_query = request.args.get('genome')
-    mut_data = []
-    seq_data = []
-    imp_data = []
-    gtex_data = []
-    imp_allele_data = []
+
+    # Extract STR info
+    if genome_query == "hg38":
+        reffa = pyfaidx.Fasta(RefFaPath_hg38)
+    else:
+        reffa = pyfaidx.Fasta(RefFaPath_hg19)
+    strinfo = GetSTRInfo(str_query, genome_query, DbSTRPath, reffa)
+    if strinfo is None: return render_template('view2_nolocus.html')
+
     freq_dist = []
-    crc_data = []
-    gene_name = ""
-    gene_desc = ""
-    motif = ""
-    copies = ""
     plotly_plot_json_datab = dict()
     plotly_plot_json_layoutb = dict()
 
     if ((genome_query is None) or (genome_query == 'hg19')):
-        reffa = pyfaidx.Fasta(RefFaPath_hg19)
-
-        chrom, start, end, motif, copies, seq = GetSTRInfo(str_query, DbSTRPath, reffa)
-        gtex_data = GetGTExInfo(str_query, DbSTRPath)
-        mut_data = GetMutInfo(str_query, DbSTRPath)
-        imp_data = GetImputationInfo(str_query, DbSTRPath)
-        imp_allele_data = GetImputationAlleleInfo(str_query, DbSTRPath)
         freq_dist = GetFreqSTRInfo(str_query, DbSTRPath)
         if len(freq_dist) > 0:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON2(freq_dist)
         
     elif (genome_query == 'hg38'):
-        reffa = pyfaidx.Fasta(RefFaPath_hg38)
-        chrom, start, end, seq, gene_name, gene_desc, motif, copies, crc_data = GetSTRInfoAPI(str_query, reffa)
         freq_dist = GetFreqSTRInfoAPI(str_query)
         if freq_dist:
             plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
-        seq_data = GetSeqDataAPI(str_query)
-
-    update_motif = motif_complement(motif)
-    
-    if len(mut_data) != 1: mut_data = None
-    else:
-        mut_data = list(mut_data[0])
-        mut_data[0] = 10**mut_data[0]
-    if len(imp_data) != 1: imp_data = None
-    else:
-        imp_data = list(imp_data[0])
-
-    if len(gtex_data) == 0: gtex_data = None
-    if len(crc_data) == 0: crc_data = None
-    if len(imp_allele_data) == 0: imp_allele_data = None
 
     return render_template('locus.html', strid=str_query,
-                           graphJSONx=plotly_plot_json_datab,graphlayoutx=plotly_plot_json_layoutb, 
-                           chrom=chrom.replace("chr",""), start=start, end=end, strseq=seq,
-                           gene_name=gene_name, gene_desc=gene_desc,
-                           estr=gtex_data, mut_data=mut_data, motif=update_motif, copies=copies, crc_data = crc_data,
-                           imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist, seq_data = seq_data)
+                           graphJSONx=plotly_plot_json_datab, graphlayoutx=plotly_plot_json_layoutb, 
+                           chrom=strinfo["chrom"], start=strinfo["start"], end=strinfo["end"], 
+                           strseq=strinfo["seq"], gene_name=strinfo["gene_name"], gene_desc=strinfo["gene_desc"],
+                           motif=strinfo["motif"], copies=strinfo["copies"], crc_data=strinfo["crc_data"],
+                           estr=strinfo["gtex_data"], mut_data=strinfo["mut_data"],
+                           imp_data=strinfo["imp_data"], imp_allele_data=strinfo["imp_allele_data"],
+                           seq_data=strinfo["seq_data"],
+                           freq_dist=freq_dist)
 
-#################### Render HTML pages ###############
+#################### Render other HTML pages ###############
 
 #### Static pages ####
 @server.route('/')
@@ -138,7 +115,7 @@ def dbSTRDownloads():
 def dbSTRTerms():
     return render_template("terms.html")
 
-#### Predefined locus pages #####
+#### Predefined locus set pages #####
 @server.route('/pathogenic')
 def dbSTRpathogenic():
     return render_template("pathogenic.html")
@@ -184,7 +161,7 @@ def main():
         server.config.update(
             TEMPLATES_AUTO_RELOAD=True
         )
-    server.run(debug = FLASK_DEBUG, host=args.host, port=args.port)
+    server.run(debug=FLASK_DEBUG, host=args.host, port=args.port)
 
 if __name__ == '__main__':
     main()
