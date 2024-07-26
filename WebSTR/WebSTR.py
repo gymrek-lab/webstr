@@ -8,6 +8,7 @@ import os
 import argparse
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify
 import pandas as pd
+import pyfaidx
 import numpy as np
 
 from locus_view import *

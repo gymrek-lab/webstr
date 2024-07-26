@@ -7,12 +7,14 @@ import numpy as np
 import pandas as pd
 import plotly
 import plotly.graph_objs as go
+import sys
 
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 
 seqbuf = 120
 seqbreakline = 100
 
+################ General functions ################
 def GetSTRInfo(str_query, genome_query, dbSTRPath, reffa):
     if genome_query is None or genome_query == "hg19":
         strinfo = GetSTRMetadataHg19(str_query, dbSTRPath)
@@ -58,6 +60,7 @@ def GetFreqPlotlyJSON(genome_query, freq_dist):
     else:
         return GetFreqPlotHg38(freq_dist)
 
+################ Fetching STR metadata  ################
 def GetSTRMetadataHg19(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     squery = ("select str.chrom, str.start, str.end,str.motif, (str.end-str.start+1)/str.period copies from strlocmotif str where str.strid = '{}'").format(strid)
@@ -103,6 +106,7 @@ def GetSTRMetadataAPI(repeat_id):
         strinfo["crc_data"] = [repeat['total_calls'], repeat['frac_variable'], repeat['avg_size_diff']]
     return strinfo
 
+################# Fetch data from hg19 specific tables #################
 def GetGTExInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     gquery = ("select estr.gene,estr.genename,ti.tissue,estr.beta,estr.beta_se,estr.pval,estr.caviar "
@@ -131,31 +135,6 @@ def GetMutInfo(strid, DbSTRPath):
         df[0] = 10**df[0]
         return df
 
-def GetSeqDataAPI(repeat_id):
-    return None # TODO
-    seq_url = API_URL + '/allseq/?repeat_id=' + repeat_id
-    print(seq_url)
-    resp = requests.get(seq_url)
-    
-    # Create a DataFrame from the API response
-    df = pd.DataFrame.from_records(resp.json())
-    
-    # Aggregating frequencies by sequence
-    # This pivots the dataframe to have sequences as rows and populations as columns with frequencies as values
-    agg_df = df.pivot_table(index='sequence', columns='population', values='frequency', aggfunc='first').reset_index()
-    
-    # Fill NaN values with 0 (or any other appropriate value indicating no frequency)
-    agg_df = agg_df.fillna(0)
-    
-    # Convert the aggregated DataFrame back to a dictionary for rendering
-    seq_data = agg_df.to_dict(orient='records')
-    
-    # Optional: If you still want to sort by sequence length and then by a population attribute, you'll need a different approach
-    # since populations are now columns. One way to handle this might be to sort by sequence length directly:
-    seq_data = sorted(seq_data, key=lambda x: len(x['sequence']))
-
-    return seq_data
-
 def GetImputationInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     gquery = ("select imp.loo_concordance,imp.loo_r,imp.wgs_eur_concordance,imp.wgs_eur_r,imp.wgs_afr_concordance,imp.wgs_afr_r,"
@@ -167,6 +146,14 @@ def GetImputationInfo(strid, DbSTRPath):
     else:
         return list(df[0])
 
+def GetImputationAlleleInfo(strid, DbSTRPath):
+    ct = connect_db(DbSTRPath).cursor()
+    gquery = ("select al.allele, al.r2, al.pval"
+              " from allelstat al where al.str_id = '{}'").format(strid)
+    df = ct.execute(gquery).fetchall()
+    return df
+
+############## Functions  for plotting freq distributions #############
 def GetFreqSTRInfo(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     gquery = ("select cohort_id, (end-start+1+af.length)/period copies,sum(nvals) nvals from"
@@ -180,28 +167,16 @@ def GetFreqSTRInfo(strid, DbSTRPath):
     else: return df
 
 def GetFreqSTRInfoAPI(repeat_id):
-    repeat_url = API_URL + '/allfreqs/?repeat_id=' + repeat_id 
-    
+    repeat_url = API_URL + '/allfreqs/?repeat_id=' + repeat_id     
     resp = requests.get(repeat_url)
     df = pd.DataFrame.from_records(json.loads(resp.text))
-
     if not df.empty:
         df["percentage"] = df["frequency"] * 100
         df["copies"] = df["n_effective"]
         grouped_df = df[["population", "copies", "percentage"]].groupby(by="population")
-    
-
         return grouped_df
     else:
         return None
-
-
-def GetImputationAlleleInfo(strid, DbSTRPath):
-    ct = connect_db(DbSTRPath).cursor()
-    gquery = ("select al.allele, al.r2, al.pval"
-              " from allelstat al where al.str_id = '{}'").format(strid)
-    df = ct.execute(gquery).fetchall()
-    return df
 
 def GetFreqPlotHg19(freq_dist):
     data1 = pd.DataFrame(np.array(freq_dist).reshape(-1,3), columns = list("abc"))
@@ -334,3 +309,19 @@ def GetFreqPlotHg38(freq_dist):
     plotly_plot_json_layoutb = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
     return plotly_plot_json_datab, plotly_plot_json_layoutb
 
+################ Get sequence info (specific to hg38) #######
+
+def GetSeqDataAPI(repeat_id):
+    seq_url = API_URL + '/allseq/?repeat_id=' + repeat_id
+    resp = requests.get(seq_url)
+    if resp.status_code == 404:
+        sys.stderr.write("WARNING: could not access allseq table from API\n")
+        return None
+    df = pd.DataFrame.from_records(resp.json())
+    agg_df = df.pivot_table(index='sequence', columns='population', values='frequency', aggfunc='first').reset_index()
+    agg_df = agg_df.fillna(0)
+    
+    # Convert the aggregated DataFrame back to a dictionary for rendering
+    seq_data = agg_df.to_dict(orient='records')
+    seq_data = sorted(seq_data, key=lambda x: len(x['sequence']))
+    return seq_data
