@@ -53,6 +53,12 @@ def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
     ret += "</font>..."
     return ret
 
+def GetFreqPlotlyJSON(genome_query, freq_dist):
+    if genome_query is None or genome_query == "hg19":
+        return GetFreqPlotHg19(freq_dist)
+    else:
+        return GetFreqPlotHg38(freq_dist)
+
 def GetSTRMetadataHg19(strid, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
     squery = ("select str.chrom, str.start, str.end,str.motif, (str.end-str.start+1)/str.period copies from strlocmotif str where str.strid = '{}'").format(strid)
@@ -70,7 +76,8 @@ def GetSTRMetadataHg19(strid, DbSTRPath):
             "mut_data": GetMutInfo(strid, DbSTRPath),
             "imp_data": GetImputationInfo(strid, DbSTRPath),
             "imp_allele_data": GetImputationAlleleInfo(strid, DbSTRPath),
-            "seq_data": []
+            "seq_data": None,
+            "freq_dist": GetFreqSTRInfo(strid, DbSTRPath)
     }
 
 def GetSTRMetadataAPI(repeat_id):
@@ -90,7 +97,8 @@ def GetSTRMetadataAPI(repeat_id):
         "mut_data": None,
         "imp_data": None,
         "imp_allele_data": None,
-        "seq_data": GetSeqDataAPI(repeat_id)
+        "seq_data": GetSeqDataAPI(repeat_id),
+        "freq_dist": GetFreqSTRInfoAPI(repeat_id)
     }
     if repeat["total_calls"] is not None:
         strinfo["crc_data"] = [repeat['total_calls'], repeat['frac_variable'], repeat['avg_size_diff']]
@@ -109,6 +117,7 @@ def GetGTExInfo(strid, DbSTRPath):
               "and estr.tissue_cd = ti.tissue_cd "
               "and strid = '{}' order by estr.caviar desc").format(strid)
     df = ct.execute(gquery).fetchall()
+    if len(df) == 0: return None
     return df
  
 def GetMutInfo(strid, DbSTRPath):
@@ -122,10 +131,6 @@ def GetMutInfo(strid, DbSTRPath):
         df = list(df[0])
         df[0] = 10**df[0]
         return df
-
-
-
-
 
 def GetSeqDataAPI(repeat_id):
     return None # TODO
@@ -172,7 +177,8 @@ def GetFreqSTRInfo(strid, DbSTRPath):
               " and str_id = '{}' "
               " group by cohort_id, copies").format(strid)
     df = ct.execute(gquery).fetchall()
-    return df
+    if len(df) == 0: return None
+    else: return df
 
 def GetFreqSTRInfoAPI(repeat_id):
     repeat_url = API_URL + '/allfreqs/?repeat_id=' + repeat_id 
@@ -198,7 +204,7 @@ def GetImputationAlleleInfo(strid, DbSTRPath):
     df = ct.execute(gquery).fetchall()
     return df
 
-def GetFreqPlotlyJSON2(freq_dist):
+def GetFreqPlotHg19(freq_dist):
     data1 = pd.DataFrame(np.array(freq_dist).reshape(-1,3), columns = list("abc"))
     minx = min(data1['b'])-1
     maxx = max(data1['b'])+1
@@ -297,7 +303,7 @@ def GetFreqPlotlyJSON2(freq_dist):
     plotly_plot_json_layoutb = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
     return plotly_plot_json_datab, plotly_plot_json_layoutb
 
-def GetFreqPlot(freq_dist):
+def GetFreqPlotHg38(freq_dist):
     data = []
 
     for cohort in freq_dist.groups.keys():

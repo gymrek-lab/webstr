@@ -63,21 +63,11 @@ def locusview():
         reffa = pyfaidx.Fasta(RefFaPath_hg19)
     strinfo = GetSTRInfo(str_query, genome_query, DbSTRPath, reffa)
     if strinfo is None: return render_template('view2_nolocus.html')
+    
+    # Plotting info
+    plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON(genome_query, strinfo["freq_dist"])
 
-    freq_dist = []
-    plotly_plot_json_datab = dict()
-    plotly_plot_json_layoutb = dict()
-
-    if ((genome_query is None) or (genome_query == 'hg19')):
-        freq_dist = GetFreqSTRInfo(str_query, DbSTRPath)
-        if len(freq_dist) > 0:
-            plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON2(freq_dist)
-        
-    elif (genome_query == 'hg38'):
-        freq_dist = GetFreqSTRInfoAPI(str_query)
-        if freq_dist:
-            plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlot(freq_dist)
-
+    # Render
     return render_template('locus.html', strid=str_query,
                            graphJSONx=plotly_plot_json_datab, graphlayoutx=plotly_plot_json_layoutb, 
                            chrom=strinfo["chrom"], start=strinfo["start"], end=strinfo["end"], 
@@ -85,8 +75,7 @@ def locusview():
                            motif=strinfo["motif"], copies=strinfo["copies"], crc_data=strinfo["crc_data"],
                            estr=strinfo["gtex_data"], mut_data=strinfo["mut_data"],
                            imp_data=strinfo["imp_data"], imp_allele_data=strinfo["imp_allele_data"],
-                           seq_data=strinfo["seq_data"],
-                           freq_dist=freq_dist)
+                           seq_data=strinfo["seq_data"])
 
 #################### Render other HTML pages ###############
 
