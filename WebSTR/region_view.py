@@ -5,20 +5,21 @@ import pandas as pd
 import numpy as np
 import re
 from dbutils import *
+from utils import *
 
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 
+def GetRegionData(region_query, region_genome, DbSTRPath=None):
+    if region_genome == "hg19":
+        return GetRegionDataHg19(region_query, DbSTRPath)
+    else:
+        return GetRegionDataAPI(region_query)
+
 ############## Functions for hg19 version ##############
 
-def GetRegionData(region_query, DbSTRPath):
-    # Connect to the db
+def GetRegionDataHg19(region_query, DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()
-    
-    # Clean up region query - remove chr/CHR
-    if region_query.find("CHR") == 0:
-        region_query = region_query.replace("CHR","")
-    if region_query.find("chr") == 0:
-        region_query = region_query.replace("chr","")
+    region_query = CleanRegionQuery(region_query)
    
     ######## Get coordinates to search #########
     genebuf = 0.1 # increase region width by this much
@@ -79,7 +80,7 @@ def GetRegionData(region_query, DbSTRPath):
 
     ########## Clean up the df and return ######
     df_hg19 = df_hg19.replace(np.nan, '', regex=True)
-    df_hg19.rename(columns = {'chrom':'chr', 'str.start':'start', 'str.end': 'end'}, inplace = True)
+    df_hg19.rename(columns={'chrom':'chr', 'str.start':'start', 'str.end': 'end'}, inplace=True)
 
     return df_hg19
 
@@ -229,29 +230,17 @@ def GetestrCalc(strid,DbSTRPath):
     return df2
 
 ################## Functions for hg38 version ####################
-def GetRegionDataAPI(region_query):    
-    colpos = region_query.find(":")
-    ensemblid = region_query.find("ENSG")
-    
-    # This is to enable searching for the region starting with chr as well as just the number
-    chromosome = region_query.find("CHR")
-    if (chromosome == 0):
-        region_query = region_query.replace("CHR","") 
-   
-    df_hg38 = pd.DataFrame({})
-    if (colpos < 0):
-        # Region query starts with ENSG, index is 0
-        if (ensemblid == 0):
+def GetRegionDataAPI(region_query):
+    region_query = CleanRegionQuery(region_query)
+    if region_query.find(":") < 0: # Search is by gene
+        if region_query.find("ENSG") == 0:
             strexp_url = API_URL + '/repeats/?ensembl_ids=' + region_query
         else:
             strexp_url = API_URL + '/repeats/?gene_names=' + region_query
-    elif (colpos > 0):
-        #strip chr
-        if region_query.lower().startswith("chr"):
-        	region_query = region_query[3:]
-        strexp_url = API_URL + '/repeats/?region_query=' + region_query
-        
+    else:
+        strexp_url = API_URL + '/repeats/?region_query=' + region_query        
     resp = requests.get(strexp_url)
     df_hg38 = pd.DataFrame.from_records(resp.json())
+    df_hg38.rename(columns={'repeat_id': 'strid'}, inplace=True)
     return df_hg38
 

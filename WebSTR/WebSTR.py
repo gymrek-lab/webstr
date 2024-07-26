@@ -40,35 +40,18 @@ server.secret_key = 'dbSTR'
 def search():
     region_genome = request.args.get('genome')
     region_query = request.args.get('query').upper()
-    
-    if (region_genome == 'hg19'):
-        region_data = GetRegionData(region_query, DbSTRPath)        
-        if region_data.shape[0] > 0:
-            gene_trace, gene_shapes, numgenes, min_gene_start, max_gene_end = GetGeneShapes(region_query, DbSTRPath)
-            plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes)
-            return render_template('view2.html',
-                                table = region_data.to_records(index=False),
-                                graphJSON = plotly_plot_json, layoutJSON = plotly_layout_json,
-                                chrom = region_data["chr"].values[0].replace("chr",""),
-                                strids = list(region_data["strid"]),
-                                genome = region_genome) 
-        else:
-            return render_template('view2_nolocus.html')
+    region_data = GetRegionData(region_query, region_genome, DbSTRPath)
+    gene_trace, gene_shapes, numgenes = GetGeneShapes(region_query, region_genome, DbSTRPath)
+    if region_data.shape[0] > 0:
+        plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes)
+        return render_template('view2.html',
+                               table = region_data.to_records(index=False),
+                               graphJSON = plotly_plot_json, layoutJSON = plotly_layout_json,
+                               chrom = region_data["chr"].values[0].replace("chr",""),
+                               strids = list(region_data["strid"]),
+                               genome = region_genome) 
     else:
-        # Use the API, because hg38 is requested
-        region_data_hg38 = GetRegionDataAPI(region_query)
-        if region_data_hg38.shape[0] > 0:
-            gene_trace_hg38, gene_shapes_hg38, numgenes_hg38, min_gene_start_hg38, max_gene_end_hg38 = GetGeneGraph(region_query)
-            plotly_plot_json_hg38, plotly_layout_json_hg38 = GetGenePlotlyJSON(region_data_hg38, gene_trace_hg38, gene_shapes_hg38, numgenes_hg38)
-            return render_template('view2.html',
-                                    table = region_data_hg38.to_records(index=False),
-                                    graphJSON = plotly_plot_json_hg38, layoutJSON = plotly_layout_json_hg38,
-                                    chrom = region_data_hg38["chr"].values[0].replace("chr",""),
-                                    strids = list(region_data_hg38["repeat_id"]),
-                                    genome = region_genome)
-        else:
-            return render_template('view2_nolocus.html')
-
+        return render_template('view2_nolocus.html')
 
 #################### Render locus page ###############
 @server.route('/locus')

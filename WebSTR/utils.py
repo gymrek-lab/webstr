@@ -1,4 +1,10 @@
-################# Motif complement ###################
+def CleanRegionQuery(region_query):
+    if region_query.find("CHR") == 0:
+        region_query = region_query.replace("CHR","")
+    if region_query.find("chr") == 0:
+        region_query = region_query.replace("chr","")
+    return region_query
+
 def motif_complement(motif):
     rev_comp = ""
     for nuc in reversed(motif):
