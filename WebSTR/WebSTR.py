@@ -148,8 +148,9 @@ def locusview():
                            imp_data=imp_data, imp_allele_data=imp_allele_data,freq_dist=freq_dist, seq_data = seq_data)
 
 #################### Render HTML pages ###############
+
+#### Static pages ####
 @server.route('/')
-@server.route('/dbSTR')
 def dbSTRHome():
     return render_template('homepage.html')
 
@@ -173,13 +174,7 @@ def dbSTRDownloads():
 def dbSTRTerms():
     return render_template("terms.html")
 
-@server.route('/url')
-def my_method():
-    try:
-        call_method_that_raises_exception()
-    except Exception as e:
-        render_template("500.html", error= str(e))
-
+#### Predefined locus pages #####
 @server.route('/pathogenic')
 def dbSTRpathogenic():
     return render_template("pathogenic.html")
@@ -187,6 +182,19 @@ def dbSTRpathogenic():
 @server.route('/GWAS')
 def dbSTRGWAS():
     return render_template("GWAS.html")
+
+#### CRC research ####
+@server.route('/crc_research')
+def graphs():    
+    return render_template("crc_research.html", api_url = API_URL)
+
+#### Error pages #####
+@server.route('/url')
+def my_method():
+    try:
+        call_method_that_raises_exception()
+    except Exception as e:
+        render_template("500.html", error= str(e))
 
 @server.errorhandler(404)
 def internal_server_error(error):
@@ -197,10 +205,6 @@ def internal_server_error(error):
 def unhandled_exception(e):
     server.logger.error('Unhandled Exception: %s', (e))
     return render_template('500.html', emsg = e), 500
-
-@server.route('/crc_research')
-def graphs():    
-    return render_template("crc_research.html", api_url = API_URL)
  
 #################### Set up and run the server ###############
 def main():
