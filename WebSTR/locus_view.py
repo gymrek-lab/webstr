@@ -11,7 +11,6 @@ seqbuf = 120
 seqbreakline = 100
 
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
-#API_URL = 'http://0.0.0.0:5000'
 
 def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
     ret = '<font size="3" color="black">...'
@@ -177,4 +176,135 @@ def GetImputationAlleleInfo(strid, DbSTRPath):
               " from allelstat al where al.str_id = '{}'").format(strid)
     df = ct.execute(gquery).fetchall()
     return df
+
+def GetFreqPlotlyJSON2(freq_dist):
+    data1 = pd.DataFrame(np.array(freq_dist).reshape(-1,3), columns = list("abc"))
+    minx = min(data1['b'])-1
+    maxx = max(data1['b'])+1
+    x1=data1.loc[data1['a'] == 1]
+    x2=data1.loc[data1['a'] == 2]
+    x3=data1.loc[data1['a'] == 3]
+    x4=data1.loc[data1['a'] == 4]
+    #for Cohort, X in data1.groupby('a'):
+    trace1 = go.Bar(
+        x=x1['b'],
+        y=x1['c'],
+        name = "Gtex"
+    )
+
+    trace2 = go.Bar(
+        x=x2['b'],
+        y=x2['c'],
+        xaxis='x2',
+        yaxis='y2',
+        name = "1000 Genomes Africa"
+    )
+
+    trace3 = go.Bar(
+        x=x3['b'],
+        y=x3['c'],
+        xaxis='x3',
+        yaxis='y3',
+        name = "1000 Genomes East Asia"
+    )
+
+    trace4 = go.Bar(
+        x=x4['b'],
+        y=x4['c'],
+        xaxis='x4',
+        yaxis='y4',
+        name = "1000 Genomes Europe"
+    )
+
+    data = [trace1, trace2, trace3, trace4]
+
+    layout = go.Layout(
+        showlegend=True,
+        legend_title="Populations",
+        margin=dict(l=20, r=20, t=20, b=20),
+        width=1200,
+         
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        xaxis=dict(
+            automargin = True,
+            domain=[0, 0.24],
+            titlefont=dict(size=20),
+            title="Number of motif copies",
+            range=[minx, maxx]
+        ),
+        yaxis=dict(
+            automargin = True,
+            title_text="Count in a population",
+            titlefont=dict(size=20),
+            showline=True
+        ),
+        xaxis2=dict(
+            domain=[0.25, 0.49],
+            anchor='y2',
+            
+            range=[minx, maxx]
+        ),
+        yaxis2=dict(
+            anchor='x2',
+        ),
+        xaxis3=dict(
+            domain=[0.50, 0.74],
+            anchor='y3',
+           
+            range=[minx, maxx]
+        ),
+        yaxis3=dict(
+            anchor='x3'
+        ),
+        xaxis4=dict(
+            domain=[0.75, 1.0],
+            anchor='y4',
+             
+            range=[minx, maxx]
+        ),
+        yaxis4=dict(
+            anchor='x4'
+        ))
+
+    plotly_plot_json_datab = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+    plotly_plot_json_layoutb = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
+    return plotly_plot_json_datab, plotly_plot_json_layoutb
+
+def GetFreqPlot(freq_dist):
+    data = []
+
+    for cohort in freq_dist.groups.keys():
+        items = freq_dist.get_group(cohort)
+        trace = go.Bar(
+            x=items['copies'],
+            y=items['percentage'],
+            name = cohort
+        )
+        data.append(trace)
+    
+    layout = go.Layout(
+        width = 1200,
+        barmode = 'group',     
+              
+        xaxis=dict(
+            automargin = True,
+            titlefont=dict(size=20),
+            title="Number of motif copies",
+        ),
+        yaxis=dict(
+            automargin = True,
+            title_text="Fraction in in a population (%)",
+            titlefont=dict(size=20),
+            showline=True
+        )
+    )
+    plotly_plot_json_datab = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+    plotly_plot_json_layoutb = json.dumps(layout, cls=plotly.utils.PlotlyJSONEncoder)
+    return plotly_plot_json_datab, plotly_plot_json_layoutb
 

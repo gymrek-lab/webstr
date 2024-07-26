@@ -13,6 +13,7 @@ from utils import motif_complement
 
 from locus_view import *
 from region_view import *
+from gene_plots import *
 
 #from dash_graphs import add_dash_graphs_to_flask_server
 
@@ -35,40 +36,22 @@ server.secret_key = 'dbSTR'
 #add_dash_graphs_to_flask_server(server)
  
 #################### Render region page ###############
-
 @server.route('/search')
 def search():
-    region_queryGenome = request.args.get('genome')
-    region_queryOrg = request.args.get('query')
-    region_query = region_queryOrg.upper()
+    region_genome = request.args.get('genome')
+    region_query = request.args.get('query').upper()
     
-    if (region_queryGenome == 'hg19'):
-        region_data = GetRegionData(region_query, DbSTRPath)
-        
+    if (region_genome == 'hg19'):
+        region_data = GetRegionData(region_query, DbSTRPath)        
         if region_data.shape[0] > 0:
-            strs_id = region_data.strid.unique()
-
-            H_data = GetHCalc(strs_id,DbSTRPath)
-            estr_data = GetestrCalc(strs_id,DbSTRPath)
-            Regions_data = pd.merge(region_data, H_data, left_on='strid', right_on = 'str_id')
-            Regions_data = pd.merge(Regions_data, estr_data, left_on='strid', right_on = 'str_id', how='left')
-            Regions_data = Regions_data.replace(np.nan, '', regex=True)
-            # Get the STRs on the plotly graph
-            Regions_data.rename(columns = {'chrom':'chr', 'str.start':'start', 'str.end': 'end'}, inplace = True)
-            #chrom = Regions_data["chr"].values[0].replace("chr","")
             gene_trace, gene_shapes, numgenes, min_gene_start, max_gene_end = GetGeneShapes(region_query, DbSTRPath)
-            region_data2 = Regions_data
-            #if (max_gene_end) > 0:
-            #    region_data2 =  GetRegionData(region_data["chr"].values[0] + ":" + str(min_gene_start) + "-" + str(max_gene_end), DbSTRPath)
-
-            plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data2, gene_trace, gene_shapes, numgenes)
-
+            plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes)
             return render_template('view2.html',
-                                table = Regions_data.to_records(index=False),
+                                table = region_data.to_records(index=False),
                                 graphJSON = plotly_plot_json, layoutJSON = plotly_layout_json,
                                 chrom = region_data["chr"].values[0].replace("chr",""),
-                                strids = list(Regions_data["strid"]),
-                                genome = region_queryGenome) 
+                                strids = list(region_data["strid"]),
+                                genome = region_genome) 
         else:
             return render_template('view2_nolocus.html')
     else:
@@ -82,7 +65,7 @@ def search():
                                     graphJSON = plotly_plot_json_hg38, layoutJSON = plotly_layout_json_hg38,
                                     chrom = region_data_hg38["chr"].values[0].replace("chr",""),
                                     strids = list(region_data_hg38["repeat_id"]),
-                                    genome = region_queryGenome)
+                                    genome = region_genome)
         else:
             return render_template('view2_nolocus.html')
 
