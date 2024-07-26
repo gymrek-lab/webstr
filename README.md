@@ -6,58 +6,93 @@ WebSTR is the result of collaboration between two scientific groups [Maria Anisi
 
 Source code for the WebSTR-API can be found here: https://github.com/acg-team/webSTR-API
 
-## Building docker container for debug and production use
+## Instructions for setting up WebSTR for local development (without docker)
 
-* You will need docker installed on your system.
-* Docker container has several stages that allow to develop in container, run WebStr.py locally (debug stage) and production with gunicorn.
-* Then run docker build n the project folder
-```
-docker build --target debug -t webstr:debug . 
-docker build -t webstr . 
-
-# example of running containers
-docker run -it --rm -t webstr:debug
-docker run -it --rm -t webstr
-```
-
-## Instructions on how to develop WebSTR web app locally with docker (for development)
-
-#### 1. For local development you can use [DevContainer](https://code.visualstudio.com/docs/devcontainers/containers) extention for Visual Studio Code, .devcontainer file is already in repository.
-#### 2. Or you can rename .vscode/lanuch.json.example to .vscode/lanuch.json and .vscode/tasks.json.example to .vscode/tasks.json and use Visual Studio Code Debug in docker feature.
-
-## Instructions on how to set-up WebSTR web app locally without docker (for development)
-
-### Set up python3 and virtualenv on your machine:
+1. Set up python3 and virtualenv on your machine:
 [For Mac, follow instructions here.](https://gist.github.com/pandafulmanda/730a9355e088a9970b18275cb9eadef3)
 
-### Create new virtual env with python3 and install all the requirements with the following command:
+2. Create a new virtual env with python3 and install all the requirements with the following command:
 `pip install -r requirements.txt`
 
-### Copy data files to data directory
+3. Copy data files to data directory
 
-We provide neccesssary data files upon request and currently working on incorporating them fully into the backend. 
+WebSTR looks for certain files at `BASEPATH`. You will need the following:
+* `$BASEPATH/hg19/hg19.fa` (hg19 reference genome)
+* `$BASEPATH/hg38/hg38.fa` (hg38 reference genome)
+* `$BASEPATH/dbSTR.db` (legacy hg19 version of the database, can be obtained [here](https://drive.google.com/file/d/1Lm-nx-G2V726Re67EnOHTWTYhgDo-W38/view?usp=sharing))
 
-You will need:
-* dbSTR.db  (contains older panels mapped to hg19 assembly)
-* hg19.fa and hg19.fai
-* hg38.fa and hg38.fai
+The hg38 database is managed by the backend and API. This is described below, along with instructions on how to test WebSTR with a non-production version of the backend database.
 
-###  Start web server
+4. To run for testing and development:
 
-To run for testing and development:
 ```
-export DATAPATH=*full data directory path*
+git clone https://github.com/gymrek-lab/webstr
+cd webstr
+# optionally, checkout a specific branch to test
+export BASEPATH=*full data directory path*
 python ./WebSTR/WebSTR.py --host 0.0.0.0 --port <port>
 ```
 
-When working with docker container you will need to mount files to the container and set the DATAPATH variable to the mounted directory path inside the container.
+You can then access the application at `localhost:$port` in your web browser.
+
+## Instructions for setting up WebSTR for local development (with docker)
+
+1. Clone the WebSTR repository
+
 ```
-docker build -t  webstr_frontend .
-docker run --mount type=bind,src=PATHTOYOURDATA,dst=/data --env DATABATH=/data webstr_frontend
+git clone https://github.com/gymrek-lab/webstr
+cd webstr
+# optionally, checkout a specific branch to test
 ```
+
+2. Build the debug version of the docker (requires docker to be installed)
+
+```
+docker build --target debug -t webstr:debug .
+```
+
+3. Run the docker
+
+You will need to mount files to the container and set the `$BASEPATH` variable:
+
+```
+docker run --mount type=bind,src=${BASEPATH},dst=/data --env BASEPATH=/data  -it --rm -t webstr:debug
+```
+
+You can then access the application at `localhost:5000` in your web browser.
+
+## Running WebSTR in production mode with docker
 
 For production mode, we use gunicorn + nginx. 
 
-### WebSTR Backend - database and API
+1. Build the docker in production mode
 
-By default WebSTR will be using WebSTR-API hosted on our server. If you would like to set up the database and WebSTR backend as well (for example if you would like to make a new endpoint or add your own data to the database), please follow instructions to set up WebSTR database and API locally provided here [https://github.com/acg-team/webSTR-API](https://github.com/acg-team/webSTR-API). Proceed then to modify API_URL variable in WebSTR browser so the app communicates with your local instance of WebSTR-API. 
+```
+docker build -t webstr .
+```
+
+2. Run the docker
+
+```
+docker run --mount type=bind,src=${BASEPATH},dst=/data --env BASEPATH=/data  -it --rm -t webstr
+```
+
+## WebSTR Backend - database and API
+
+WebSTR access its database through an API. By default, it uses http://webstr-api.ucsd.edu. To set a custom location for the API, for example if you are testing a non-production version of the database, you can set a different location using the `WEBSTR_API_URL` environment variable.
+
+The code for the WebSTR-API backend is maintained [here](https://github.com/acg-team/webSTR-API). If you have your own version of the database and want to test the backend locally you will need to run something like the following from inside the `webSTR-API` repo:
+
+```
+# Set the path to your local database
+export DATABASE_URL="postgres://webstr:webstr@localhost:5432/strdb"
+
+# Launch the API
+uvicorn strAPI.main:app --host=0.0.0.0 --port=${PORT:-5000} --reload
+```
+
+Now the API should be available at localhost:5000. Before running WebSTR you can set:
+
+```
+export WEBSTR_API_URL=http://0.0.0.0:5000
+```
