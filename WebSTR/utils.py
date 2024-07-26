@@ -5,7 +5,7 @@ def CleanRegionQuery(region_query):
         region_query = region_query.replace("chr","")
     return region_query
 
-def motif_complement(motif):
+def GetMotifAndComplement(motif):
     rev_comp = ""
     for nuc in reversed(motif):
         if nuc == "A":
