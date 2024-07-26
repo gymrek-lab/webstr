@@ -30,6 +30,7 @@ git clone https://github.com/gymrek-lab/webstr
 cd webstr
 # optionally, checkout a specific branch to test
 export BASEPATH=*full data directory path*
+export FLASK_DEBUG=1 # run in debug mode
 python ./WebSTR/WebSTR.py --host 0.0.0.0 --port <port>
 ```
 
