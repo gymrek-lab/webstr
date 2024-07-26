@@ -1,7 +1,6 @@
 import os
 from dbutils import *
 from utils import *
-import pyfaidx
 import requests
 import json
 import numpy as np
@@ -28,7 +27,7 @@ def GetSTRInfo(str_query, genome_query, dbSTRPath, reffa):
     rflank = str(reffa[chrom][end:end+seqbuf]).upper()
     strinfo["chrom"] = strinfo["chrom"].replace("chr","")
     strinfo["seq"] = GetSTRSeqHTML(lflank,strseq,rflank)
-    strinfo["motif"] = motif_complement(strinfo["motif"])
+    strinfo["motif"] = GetMotifAndComplement(strinfo["motif"])
     return strinfo
 
 def GetSTRSeqHTML(lflank, strseq, rflank, charbreak=50):
