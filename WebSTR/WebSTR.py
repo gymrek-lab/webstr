@@ -18,17 +18,11 @@ from gene_plots import *
 #from dash_graphs import add_dash_graphs_to_flask_server
 
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+BASEPATH =  os.environ.get("BASEPATH", "/storage/resources/dbase/human/")
 
-#################### Database paths ###############
-PLATFORM = "snorlax" # or AWS
-BASEPATH =  "/storage/resources/dbase/human/"
-if PLATFORM == "snorlax":
-    DbSTRPath = BASEPATH
-    RefFaPath_hg19 = BASEPATH + "hg19/hg19.fa"
-    RefFaPath_hg38 = BASEPATH + "hg38/hg38.fa"
-else:
-    sys.stderr.write("Could not locate database files\n")
-    sys.exit(1)
+#################### Data paths ###############
+RefFaPath_hg19 = os.path.join(BASEPATH, "hg19", "hg19.fa")
+RefFaPath_hg38 = os.path.join(BASEPATH, "hg38", "hg38.fa")
 
 #################### Set up flask server ###############
 server = Flask(__name__)
@@ -40,9 +34,9 @@ server.secret_key = 'dbSTR'
 def search():
     region_genome = request.args.get('genome')
     region_query = request.args.get('query').upper()
-    region_data = GetRegionData(region_query, region_genome, DbSTRPath)
+    region_data = GetRegionData(region_query, region_genome, BASEPATH)
     if region_data.shape[0] == 0: return render_template('view2_nolocus.html')
-    gene_trace, gene_shapes, numgenes = GetGeneShapes(region_query, region_genome, DbSTRPath)
+    gene_trace, gene_shapes, numgenes = GetGeneShapes(region_query, region_genome, BASEPATH)
     plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes)
     return render_template('view2.html',
                            table = region_data.to_records(index=False),
@@ -62,7 +56,7 @@ def locusview():
         reffa = pyfaidx.Fasta(RefFaPath_hg38)
     else:
         reffa = pyfaidx.Fasta(RefFaPath_hg19)
-    strinfo = GetSTRInfo(str_query, genome_query, DbSTRPath, reffa)
+    strinfo = GetSTRInfo(str_query, genome_query, BASEPATH, reffa)
     if strinfo is None: return render_template('view2_nolocus.html')
     
     # Plotting info
