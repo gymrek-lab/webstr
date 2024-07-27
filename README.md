@@ -6,6 +6,13 @@ WebSTR is the result of collaboration between two scientific groups [Maria Anisi
 
 Source code for the WebSTR-API can be found here: https://github.com/acg-team/webSTR-API
 
+## Contributing
+
+If you would like to make changes to WebSTR, you must:
+1. Create a new branch off of main and make your edits
+2. Submit a pull request to merge your new branch to main
+3. The pull request must be reviewed and approved by a WebSTR developer prior to merging with main.
+
 ## Instructions for setting up WebSTR for local development (without docker)
 
 1. Set up python3 and virtualenv on your machine:
