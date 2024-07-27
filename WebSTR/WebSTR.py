@@ -3,20 +3,22 @@
 WebSTR database application
 """
 
-import sys
-import os
+# Package imports
 import argparse
 from flask import Flask, redirect, render_template, request, session, url_for, jsonify
+import numpy as np
+import os
 import pandas as pd
 import pyfaidx
-import numpy as np
+import sys
 
+# Local imports
 from locus_view import *
 from region_view import *
 from gene_plots import *
+from dash_graphs import add_dash_graphs_to_flask_server
 
-#from dash_graphs import add_dash_graphs_to_flask_server
-
+# Grab environment variables
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 BASEPATH =  os.environ.get("BASEPATH", "/storage/resources/dbase/human/")
 
@@ -27,7 +29,7 @@ RefFaPath_hg38 = os.path.join(BASEPATH, "hg38", "hg38.fa")
 #################### Set up flask server ###############
 server = Flask(__name__)
 server.secret_key = 'dbSTR' 
-#add_dash_graphs_to_flask_server(server)
+add_dash_graphs_to_flask_server(server)
  
 #################### Render region page ###############
 @server.route('/search')
