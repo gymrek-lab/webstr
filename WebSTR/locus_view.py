@@ -278,6 +278,7 @@ def GetFreqPlotHg19(freq_dist):
     return plotly_plot_json_datab, plotly_plot_json_layoutb
 
 def GetFreqPlotHg38(freq_dist):
+    if freq_dist is None: return dict(), dict()
     data = []
 
     for cohort in freq_dist.groups.keys():
