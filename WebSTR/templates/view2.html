@@ -110,7 +110,6 @@ mark.green {
           <table id="strTable" border="1" cellpadding="2" cellspacing="2" class="table table-bordered">
             <thead class="tablesorter-header"><th>
               <abbr title="The chromosome, start position, and end position of the STR in the hg38 reference genome"> STR Locus (hg38)</abbr></th>
-              <th><abbr title="Start of the STR location"> Start coordinate</abbr>  </th> 
               <th><abbr title="Size of the repeating unit of the STR"> STR unit size </abbr>  </th>
               <th><abbr title="The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC."> Motif</th></abbr>
               <th><abbr title="The number of consecutive copies of the repeat motif present in the hg38 reference genome."># copies (hg38)</abbr></th>
@@ -121,8 +120,7 @@ mark.green {
             <tr>
               <td><a href="/locus?repeat_id={{d[0]}}&genome=hg38" target="_blank"> 
                 {{ d[1] }}:{{ d [2] }}-{{ d[3] }}</a></td>
-              <td>{{ d[2] }}</td>
-              <td>{{ d[6] }}</td>
+               <td>{{ d[6] }}</td>
               <td>{{ d[5] }}</td>
               <td>{{d[7]}}</td>
               <td>{{ d[15] | safe }}</td>
