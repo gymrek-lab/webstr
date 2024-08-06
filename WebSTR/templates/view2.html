@@ -1,138 +1,631 @@
 {% extends "layout.html" %}
-
 {% block body %}
-
-
-<!-- Div for the plotly chart -->
 <div id="chart" class="chart"></div>
-
-
 <script type="text/javascript">
-  var chrom  = {{chrom | tojson}};
-  var graphs = {{graphJSON | safe}};
-  var layout = {{layoutJSON | safe}};
-  var strids = {{strids | safe}};
+    var chrom = {{ chrom | tojson }};
+    var graphs = {{ graphJSON | safe }};
+    var layout = {{ layoutJSON | safe }};
+    var strids = {{ strids | safe }};
+    var myPlot = document.getElementById('chart'),
+        d3 = Plotly.d3,
+        data = graphs,
+        layout = layout;
 
-  var myPlot = document.getElementById('chart'),
-    d3 = Plotly.d3,
-    data = graphs,
-    layout=layout;
-
-  Plotly.newPlot('chart', data, layout);
-
-
-  myPlot.on('plotly_click', function(data){
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const genome = urlParams.get('genome');
-    for(var i=0; i < data.points.length; i++){
-        if (data.points[i].curveNumber==1) {
-          url="None";
+    Plotly.newPlot('chart', data, layout);
+    myPlot.on('plotly_click', function(data) {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const genome = urlParams.get('genome');
+        let url = "None";
+        for (var i = 0; i < data.points.length; i++) {
+            if (data.points[i].curveNumber == 1) {
+                url = "None";
+            } else {
+                if (genome == 'hg19') {
+                    url = "/locus?repeat_id=" + strids[data.points[i].pointNumber]
+                } else {
+                    url = "/locus?repeat_id=" + strids[data.points[i].pointNumber] + '&genome=hg38'
+                }
+            }
         }
-        else {
-          if (genome == 'hg19')  {
-            url="/locus?repeat_id="+strids[data.points[i].pointNumber]
-         } else {
-            url="/locus?repeat_id="+strids[data.points[i].pointNumber]+'&genome=hg38'
-         }
+        if (url != "None") {
+            var win = window.open(url, "_blank");
+            win.focus();
         }
+    });
+
+    let sortOrder = {}; // Keep track of sort order
+    let filteredData = []; // Define filteredData in the same scope as sortOrder
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let genome = ""; // Define genome variable
+
+    // Function to sort table
+    function sortTable(column) {
+        console.log(`Sorting by column: ${column}`);
+        const order = sortOrder[column] === 'asc' ? 'desc' : 'asc';
+        sortOrder[column] = order;
+
+        // Update sort icons
+        document.querySelectorAll('.sort-icon-up, .sort-icon-down').forEach(icon => {
+            icon.classList.remove('active');
+            icon.classList.add('neutral');
+        });
+        const upIcon = document.querySelector(`.sort-icon-up[data-column="${column}"]`);
+        const downIcon = document.querySelector(`.sort-icon-down[data-column="${column}"]`);
+        if (order === 'asc') {
+            upIcon.classList.remove('neutral');
+            upIcon.classList.add('active');
+            downIcon.classList.remove('active');
+            downIcon.classList.add('neutral');
+        } else {
+            upIcon.classList.remove('active');
+            upIcon.classList.add('neutral');
+            downIcon.classList.remove('neutral');
+            downIcon.classList.add('active');
+        }
+
+        filteredData.sort((a, b) => {
+            if (column === 'chr') {
+                if (a[column] === b[column]) {
+                    return order === 'asc' ? a['start'] - b['start'] : b['start'] - a['start'];
+                }
+                return order === 'asc' ? a[column].localeCompare(b[column]) : b[column].localeCompare(a[column]);
+            }
+            if (a[column] < b[column]) return order === 'asc' ? -1 : 1;
+            if (a[column] > b[column]) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
+        renderCards(currentPage);
+        renderPagination();
     }
-    if (url != "None") {
-    var win = window.open(url, "_blank");
-    win.focus();
+
+    // Function to render cards
+    function renderCards(page) {
+        const cardContainer = document.getElementById('card-container');
+        cardContainer.innerHTML = '';
+
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageData = filteredData.slice(start, end);
+
+        pageData.forEach(item => {
+            const row = document.createElement('tr');
+
+            if (genome === 'hg19') {
+                const strLocusCell = document.createElement('td');
+                strLocusCell.innerHTML = `<a href="/locus?repeat_id=${item.strid}&genome=hg19" target="_blank">${item.chr}:${item.start}-${item.end}</a>`;
+                row.appendChild(strLocusCell);
+
+                const motifCell = document.createElement('td');
+                motifCell.innerText = item.motif;
+                row.appendChild(motifCell);
+
+                const copiesCell = document.createElement('td');
+                copiesCell.innerText = item.length !== undefined ? `${parseFloat(item.length).toFixed(1)}` : 'N/A';
+                row.appendChild(copiesCell);
+
+                const estrCell = document.createElement('td');
+                estrCell.innerHTML = item.thtml || 'N/A';
+                row.appendChild(estrCell);
+
+                const heterozygosityCell = document.createElement('td');
+                heterozygosityCell.innerHTML = item.Hhtml || 'N/A';
+                row.appendChild(heterozygosityCell);
+            } else {
+                const strLocusCell = document.createElement('td');
+                strLocusCell.innerHTML = `<a href="/locus?repeat_id=${item.strid}&genome=hg38" target="_blank">${item.chr}:${item.start}-${item.end}</a>`;
+                row.appendChild(strLocusCell);
+
+                const startCoordinateCell = document.createElement('td');
+                startCoordinateCell.innerText = item.start;
+                row.appendChild(startCoordinateCell);
+
+                const strUnitSizeCell = document.createElement('td');
+                strUnitSizeCell.innerText = item.period || 'N/A';
+                row.appendChild(strUnitSizeCell);
+
+                const motifCell = document.createElement('td');
+                motifCell.innerText = item.motif;
+                row.appendChild(motifCell);
+
+                const copiesCell = document.createElement('td');
+                copiesCell.innerText = item.copies || 'N/A';
+                row.appendChild(copiesCell);
+
+                const referencePanelCell = document.createElement('td');
+                referencePanelCell.innerText = item.panel || 'N/A';
+                row.appendChild(referencePanelCell);
+            }
+
+            cardContainer.appendChild(row);
+        });
+
+        const entriesInfo = document.getElementById('entriesInfo');
+        entriesInfo.innerText = `Showing ${start + 1} to ${Math.min(end, filteredData.length)} of ${filteredData.length} entries`;
     }
-});
 
-$(document).ready(function(){
-  $('[data-toggle="tooltip"]').tooltip(); 
-  $('#strTable').DataTable();
-});
+    // Function to render pagination
+    function renderPagination() {
+        const pagination = document.querySelector('.pagination');
+        pagination.innerHTML = '';
 
+        const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+        const previousItem = document.createElement('li');
+        previousItem.className = 'page-item';
+        const previousLink = document.createElement('a');
+        previousLink.className = 'page-link';
+        previousLink.href = '#';
+        previousLink.setAttribute('aria-label', 'Previous');
+        previousLink.innerHTML = '<span aria-hidden="true">&laquo;</span>';
+        previousLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                renderCards(currentPage);
+                renderPagination();
+            }
+        });
+        previousItem.appendChild(previousLink);
+        pagination.appendChild(previousItem);
 
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(pageCount, startPage + maxPagesToShow - 1);
+
+        if (startPage > 1) {
+            const firstPageItem = document.createElement('li');
+            firstPageItem.className = 'page-item';
+            const firstPageLink = document.createElement('a');
+            firstPageLink.className = 'page-link';
+            firstPageLink.href = '#';
+            firstPageLink.innerText = '1';
+            firstPageLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentPage = 1;
+                renderCards(currentPage);
+                renderPagination();
+            });
+            firstPageItem.appendChild(firstPageLink);
+            pagination.appendChild(firstPageItem);
+
+            if (startPage > 2) {
+                const dotsItem = document.createElement('li');
+                dotsItem.className = 'page-item disabled';
+                const dotsLink = document.createElement('a');
+                dotsLink.className = 'page-link';
+                dotsLink.href = '#';
+                dotsLink.innerText = '...';
+                dotsItem.appendChild(dotsLink);
+                pagination.appendChild(dotsItem);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageItem = document.createElement('li');
+            pageItem.className = 'page-item' + (i === currentPage ? ' active' : '');
+            const pageLink = document.createElement('a');
+            pageLink.className = 'page-link';
+            pageLink.href = '#';
+            pageLink.innerText = i;
+            pageLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentPage = i;
+                renderCards(currentPage);
+                renderPagination();
+            });
+            pageItem.appendChild(pageLink);
+            pagination.appendChild(pageItem);
+        }
+
+        if (endPage < pageCount) {
+            if (endPage < pageCount - 1) {
+                const dotsItem = document.createElement('li');
+                dotsItem.className = 'page-item disabled';
+                const dotsLink = document.createElement('a');
+                dotsLink.className = 'page-link';
+                dotsLink.href = '#';
+                dotsLink.innerText = '...';
+                dotsItem.appendChild(dotsLink);
+                pagination.appendChild(dotsItem);
+            }
+
+            const lastPageItem = document.createElement('li');
+            lastPageItem.className = 'page-item';
+            const lastPageLink = document.createElement('a');
+            lastPageLink.className = 'page-link';
+            lastPageLink.href = '#';
+            lastPageLink.innerText = pageCount;
+            lastPageLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentPage = pageCount;
+                renderCards(currentPage);
+                renderPagination();
+            });
+            lastPageItem.appendChild(lastPageLink);
+            pagination.appendChild(lastPageItem);
+        }
+
+        const nextItem = document.createElement('li');
+        nextItem.className = 'page-item';
+        const nextLink = document.createElement('a');
+        nextLink.className = 'page-link';
+        nextLink.href = '#';
+        nextLink.setAttribute('aria-label', 'Next');
+        nextLink.innerHTML = '<span aria-hidden="true">&raquo;</span>';
+        nextLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage < pageCount) {
+                currentPage++;
+                renderCards(currentPage);
+                renderPagination();
+            }
+        });
+        nextItem.appendChild(nextLink);
+        pagination.appendChild(nextItem);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const data = {{ data | tojson }};
+        genome = "{{ genome }}"; // Initialize genome within the DOMContentLoaded scope
+        filteredData = data;
+
+        renderCards(currentPage);
+        renderPagination();
+
+        document.getElementById('entriesPerPage').addEventListener('change', function() {
+            itemsPerPage = parseInt(this.value);
+            currentPage = 1;
+            renderCards(currentPage);
+            renderPagination();
+        });
+
+        document.getElementById('tableSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            filteredData = data.filter(item => {
+                if (genome === 'hg19') {
+                    return item.chr.toLowerCase().includes(searchTerm) ||
+                        item.start.toString().includes(searchTerm) ||
+                        item.end.toString().includes(searchTerm) ||
+                        item.motif.toLowerCase().includes(searchTerm) ||
+                        item.thtml?.toLowerCase().includes(searchTerm) ||
+                        item.Hhtml?.toLowerCase().includes(searchTerm);
+                } else {
+                    return item.chr.toLowerCase().includes(searchTerm) ||
+                        item.start.toString().includes(searchTerm) ||
+                        item.end.toString().includes(searchTerm) ||
+                        item.motif.toLowerCase().includes(searchTerm) ||
+                        item.panel?.toLowerCase().includes(searchTerm);
+                }
+            });
+            currentPage = 1;
+            renderCards(currentPage);
+            renderPagination();
+        });
+
+        $('.popover-table-header').popover({
+            container: 'body',
+            trigger: 'click',
+            placement: 'top'
+        });
+
+        $(document).on('mouseenter', '.popover-badge', function() {
+            $(this).popover({
+                container: 'body',
+                trigger: 'hover',
+                placement: 'top'
+            }).popover('show');
+        });
+
+        $(document).on('mouseleave', '.popover-badge', function() {
+            $(this).popover('hide');
+        });
+    });
 </script>
-<style>
-mark.red {
-    color:#ff0000;
-    background: white;}
-mark.gray {
-    color:gray;
-    background: white;}
-mark.gold {
-    color:gold;
-    background: white;}
-mark.blue {
-    color:blue;
-    background: white;}
-mark.purple {
-    color:purple;
-    background: white;}
-mark.green {
-    color:green;
-    background: white;}
-
-</style>
-
-<div id="plotLegend" class="plotfooter"></div>
-
-<!-- Main table of STRs in this region -->
 
 <div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            {% if genome == 'hg19' %}
+            <h3>STR locations found in hg19</h3>
+            <p>
+                <b>Motif length:</b> <mark class="gray">1: gray</mark>,
+                <mark class="red">2: red</mark>, <mark class="gold">3: gold</mark>,
+                <mark class="blue">4: blue</mark>,
+                <mark class="purple">5: purple</mark>,
+                <mark class="green">6: green</mark>
+            </p>
+            <h6>Hover over table column headings to display additional details</h6>
+            {% else %}
+            <h3>STR locations found in hg38</h3>
+            {% endif %}
 
-  <div class="row justify-content-center">
-    <div class="col-md-10 col-md-offset-1">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="entriesPerPage">Show</label>
+                    <select id="entriesPerPage" class="form-control d-inline-block" style="width: 15%">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <label for="entriesPerPage">entries</label>
+                </div>
+                <div class="col-md-6 text-right">
+                    <label for="tableSearch">Search:</label>
+                    <input id="tableSearch" type="text" class="form-control d-inline-block" style="width: 15%" />
+                </div>
+            </div>
 
-      {% if genome == 'hg19' %}
-      <h3>STR locations found in hg19</h3>  
-      <p> <b> Motif length:</b> <mark class="gray"> 1: gray, <mark class="red"> 2: red , <mark class="gold"> 3: gold, <mark class="blue"> 4: blue, <mark class="purple"> 5: purple, <mark class="green"> 6: green </p>
-      <h6> Hover over table column headings to display addtional details </h6>  
-        <div id="variants_table_container" style>  
-      <table border="1" cellpadding="5" cellspacing="5" class="table table-bordered">
-        <thead class="tablesorter-header"><th><abbr title="The chromosome, start position, and end position of the STR in the hg19 reference genome"> STR Locus (hg19)</abbr></th><th><abbr title="The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC."> Motif</th></abbr><th><abbr title="The number of consecutive copies of the repeat motif present in the hg19 reference genome."># copies (hg19)</abbr></th><th><abbr title="eSTRs are STRs whose lengths are linearly associated with expression of nearby genes. Each circle gives the effect size of significant eSTRs identified in the GTEx cohort (Fotsing et al. Nature Genetics 2019). Circles are color-coded by tissue. Hover over a circle to see the tissue and target gene of each eSTR. Click on an STR to see more information about eSTR effects.">  eSTRs (FDR<0.1)</abbr>  </th> <th><abbr title="Heterozygosity gives a measure of how polymorphic the STR is. It is computed as 1-(sum of squared frequency of each allele). Values close to 1 indicate highly polymorphic STRs. Values close to 0 indicate an STR that is mostly not variable in the population."> Heterozygosity </abbr></th></thead>
-        <tbody>
-        {% for d in table %}
-        <tr>
-          <td><a href="/locus?repeat_id={{d[6]}}" target="_blank"> {{ d[0] }}:{{ d [1] }}-{{ d[2] }}</a></td>
-          <td>{{ d[3] }}</td>
-          <td>{{'%0.1f' % d[5]|float}}</td>
-                <td>{{ d[13] | safe }}</td>
-                <td>{{ d[10] | safe }}</td>
-          
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-      {% endif %}
+            <div class="table-responsive">
+                <table id="myTable" class="table table-bordered">
+                    <thead>
+                        {% if genome == 'hg19' %}
+                        <tr>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="The chromosome, start position, and end position of the STR in the hg19 reference genome">
+                                    STR Locus (hg19)
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="chr" onclick="sortTable('chr')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="chr" onclick="sortTable('chr')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC.">
+                                    Motif
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="motif" onclick="sortTable('motif')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="motif" onclick="sortTable('motif')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="The number of consecutive copies of the repeat motif present in the hg19 reference genome.">
+                                    # copies (hg19)
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="length" onclick="sortTable('length')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="length" onclick="sortTable('length')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="eSTRs are STRs whose lengths are linearly associated with expression of nearby genes. Each circle gives the effect size of significant eSTRs identified in the GTEx cohort (Fotsing et al. Nature Genetics 2019). Circles are color-coded by tissue. Hover over a circle to see the tissue and target gene of each eSTR. Click on an STR to see more information about eSTR effects.">
+                                    eSTRs (FDR<0.1)
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="thtml" onclick="sortTable('thtml')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="thtml" onclick="sortTable('thtml')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="Heterozygosity gives a measure of how polymorphic the STR is. It is computed as 1-(sum of squared frequency of each allele). Values close to 1 indicate highly polymorphic STRs. Values close to 0 indicate an STR that is mostly not variable in the population.">
+                                    Heterozygosity
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="Hhtml" onclick="sortTable('Hhtml')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="Hhtml" onclick="sortTable('Hhtml')">↓</span>
+                                </div>
+                            </th>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="The chromosome, start position, and end position of the STR in the hg38 reference genome">
+                                    STR Locus (hg38)
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="chr" onclick="sortTable('chr')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="chr" onclick="sortTable('chr')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="Start of the STR location">
+                                    Start coordinate
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="start" onclick="sortTable('start')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="start" onclick="sortTable('start')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="Size of the repeating unit of the STR">
+                                    STR unit size
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="period" onclick="sortTable('period')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="period" onclick="sortTable('period')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC.">
+                                    Motif
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="motif" onclick="sortTable('motif')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="motif" onclick="sortTable('motif')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="The number of consecutive copies of the repeat motif present in the hg38 reference genome.">
+                                    # copies (hg38)
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="copies" onclick="sortTable('copies')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="copies" onclick="sortTable('copies')">↓</span>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="popover-table-header" data-toggle="popover" data-content="Which repeat panel STR belongs to">
+                                    Reference panel
+                                </div>
+                                <div class="sort-icons-container">
+                                    <span class="sort-icon-up neutral" data-column="panel" onclick="sortTable('panel')">↑</span>
+                                    <span class="sort-icon-down neutral" data-column="panel" onclick="sortTable('panel')">↓</span>
+                                </div>
+                            </th>
+                        </tr>
+                        {% endif %}
+                    </thead>
+                    <tbody id="card-container">
+                        <!-- Cards will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
 
-      {% if genome == 'hg38' %}
-      <h3>STR locations found in hg38</h3>  
-        <div id="variants_table_container" style>  
-  
-          <table id="strTable" border="1" cellpadding="2" cellspacing="2" class="table table-bordered">
-            <thead class="tablesorter-header"><th>
-              <abbr title="The chromosome, start position, and end position of the STR in the hg38 reference genome"> STR Locus (hg38)</abbr></th>
-              <th><abbr title="Start of the STR location"> Start coordinate</abbr>  </th> 
-              <th><abbr title="Size of the repeating unit of the STR"> STR unit size </abbr>  </th>
-              <th><abbr title="The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC."> Motif</th></abbr>
-              <th><abbr title="The number of consecutive copies of the repeat motif present in the hg38 reference genome."># copies (hg38)</abbr></th>
-              <th><abbr title="Which repeat panel STR belongs to "> Reference panel</abbr>  </th> 
-            </thead>
-            <tbody>
-            {% for d in table %}
-            <tr>
-              <td><a href="/locus?repeat_id={{d[0]}}&genome=hg38" target="_blank"> 
-                {{ d[1] }}:{{ d [2] }}-{{ d[3] }}</a></td>
-              <td>{{ d[2] }}</td>
-              <td>{{ d[6] }}</td>
-              <td>{{ d[5] }}</td>
-              <td>{{d[7]}}</td>
-              <td>{{ d[15] | safe }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-          {% endif %}
-      </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <span id="entriesInfo"></span>
+                </div>
+                <div class="col-md-6">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <!-- Page numbers will be inserted here by JavaScript -->
+                            <li class="page-item">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
+<style>
+  mark.red {
+    color: #ff0000;
+    background: white;
+  }
+  mark.gray {
+    color: gray;
+    background: white;
+  }
+  mark.gold {
+    color: gold;
+    background: white;
+  }
+  mark.blue {
+    color: blue;
+    background: white;
+  }
+  mark.purple {
+    color: purple;
+    background: white;
+  }
+  mark.green {
+    color: green;
+    background: white;
+  }
+
+  body {
+    background-color: #fff;
+  }
+
+  .container-fluid {
+    background-color: #fff;
+  }
+
+  .table-responsive {
+    overflow: visible;
+  }
+
+  .table {
+    background-color: #fff;
+    color: #333;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #ddd;
+  }
+
+  .table th {
+    background-color: #f9f9f9;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .sort-icons-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+    margin: 0 0.5em 0 0;
+  }
+
+  .sort-icon-up {
+    cursor: pointer;
+    font-size: 1em;
+    display: inline-block;
+    opacity: 0.4;
+    outline: none;
+    user-select: none;
+    position: relative;
+    margin: 0 -5px 0 0;
+  }
+
+  .sort-icon-down {
+    cursor: pointer;
+    font-size: 1em;
+    display: inline-block;
+    opacity: 0.4;
+    outline: none;
+    user-select: none;
+    position: relative;
+  }
+
+  .sort-icon-up.active,
+  .sort-icon-down.active {
+    opacity: 1;
+    background-color: transparent;
+  }
+
+  .sort-icon-up.neutral,
+  .sort-icon-down.neutral {
+    opacity: 0.4;
+  }
+
+  .badge {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none;
+  }
+
+  .popover-table-header {
+    cursor: pointer; 
+    display: inline-block;
+    border-bottom: dotted 2px;
+  }
+
+  .popover {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+  }
+
+  .popover-header {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+  }
+
+  .popover-body {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+  }
+
+  .popover .arrow::after {
+    border-top-color: rgba(0, 0, 0, 0.8); 
+  }
+</style>
 {% endblock %}
+

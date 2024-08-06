@@ -13,39 +13,44 @@
     <title>WebSTR: a population-wide database of short tandem repeat variation in humans</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.css">
+     <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/theme.default.css') }}"> 
-    
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/typeaheadjs.css') }}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
-    
-    {% block loads %}{% endblock %}
-    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.js"></script>
-    
-    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='typeahead.bundle.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='plotly-2.16.1.min.js') }}"></script>
-    <!--tablesorter's css-->
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery.tablesorter.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery.tablesorter.pager.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='underscore-min.js') }}"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/theme.default.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/typeaheadjs.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
 
+  {% block loads %}{% endblock %}
+</head>
+<body>
+  <!-- Your content here -->
 
-    <script type="text/javascript" src="{{ url_for('static', filename='d3.v3.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
-    <script type="text/javascript" src="{{  url_for('static', filename='exac.js') }}"></script>
-    <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Popper.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-        ga('create', 'UA-55729303-1', 'auto');
-        ga('send', 'pageview');
+  <!-- Custom JS -->
+  <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='typeahead.bundle.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='plotly-2.16.1.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='jquery.tablesorter.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='jquery.tablesorter.pager.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='underscore-min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='d3.v3.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='exac.js') }}"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r.q||[]].push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-55729303-1', 'auto');
+    ga('send', 'pageview');
     </script>
 
     <script type="text/javascript">
@@ -123,23 +128,22 @@
   overflow: overlay;
   background-color: #FFFFFF;
   border: 1px solid white;
-
 }
 
 table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    th, td {
-      border: 1px solid black;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-  
+  border-collapse: collapse;
+  width: 100%;
+}
 
+th, td {
+  border: 1px solid black;
+  padding: 0px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
 </style>
 
 </head>
@@ -172,44 +176,36 @@ table {
               <div class="form-group">
                       <select name="genome" id = "genome-select" class="form-control" style="display:inline">
                         <option value="hg38">H. Sapiens (hg38)</option>
-			<option value="hg19">H. Sapiens (hg19)</option>
+                        <option value="hg19">H. Sapiens (hg19)</option>
                       </select>
                     </div>
 
-
                     <script>
                     document.addEventListener('DOMContentLoaded', function() {
-  var lastSelectedOption = localStorage.getItem('selectedGenomeOption');
+                      var lastSelectedOption = localStorage.getItem('selectedGenomeOption');
 
-  var genomeSelect = document.getElementById('genome-select');
-  genomeSelect.value = lastSelectedOption || 'hg38';
+                      var genomeSelect = document.getElementById('genome-select');
+                      genomeSelect.value = lastSelectedOption || 'hg38';
 
-  genomeSelect.addEventListener('change', function(e) {
-    var selectedOption = e.target.value;
-    localStorage.setItem('selectedGenomeOption', selectedOption);
-  });
+                      genomeSelect.addEventListener('change', function(e) {
+                        var selectedOption = e.target.value;
+                        localStorage.setItem('selectedGenomeOption', selectedOption);
+                      });
 
-  if (window.location.pathname === '/') {
-    localStorage.removeItem('selectedGenomeOption');
-    genomeSelect.value = 'hg38';
-  }
-});
-  
+                      if (window.location.pathname === '/') {
+                        localStorage.removeItem('selectedGenomeOption');
+                        genomeSelect.value = 'hg38';
+                      }
+                    });
                     </script>
 
-              
-            
-
-                  
-                
                 <input id="navbar-searchbox-input" name="query" class="form-control mr-sm-2" type="text" placeholder="Gene or region"/>
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </div>
         </form>
         </div>
     </div>
-      </nav>
-
+    </nav>
 
 <div class="container-fluid jobs">
     <p>
