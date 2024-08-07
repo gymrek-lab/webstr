@@ -1,5 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
+
+<!-- plotly chart top of search page -->
+
 <div id="chart" class="chart"></div>
 <script type="text/javascript">
     var chrom = {{ chrom | tojson }};
@@ -10,8 +13,11 @@
         d3 = Plotly.d3,
         data = graphs,
         layout = layout;
+    var config = {
+        responsive: true 
+    };
 
-    Plotly.newPlot('chart', data, layout);
+    Plotly.newPlot('chart', data, layout, config);
     myPlot.on('plotly_click', function(data) {
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
@@ -34,7 +40,24 @@
         }
     });
 
+
+
+
     
+    /*
+    This file contains JavaScript code that handles sorting, rendering cards, and rendering pagination for a table in the HTML document.
+    The code defines several variables and functions, including:
+    - sortOrder: an object that stores the sort order for each column
+    - filteredData: an array that stores the filtered data for the table
+    - currentPage: a variable that stores the current page number
+    - itemsPerPage: a variable that stores the number of items to display per page
+    - genome: a variable that stores the genome type
+    - sortTable(): a function that sorts the table data based on the selected column
+    - renderCards(): a function that renders the table cards based on the current page
+    - renderPagination(): a function that renders the pagination for the table
+    The code also includes event listeners and initialization code for the table.
+    */
+
     let sortOrder = {};
     let filteredData = [];
     let currentPage = 1;
@@ -106,7 +129,6 @@
                 createCell(item.thtml || 'N/A', true);
                 createCell(item.Hhtml || 'N/A', true);
             } else {
-                createCell(item.start);
                 createCell(item.period || 'N/A');
                 createCell(item.motif);
                 createCell(item.copies || 'N/A');
@@ -175,7 +197,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const data = {{ data | tojson }};
-    genome = "{{ genome }}"; // Initialize genome within the DOMContentLoaded scope
+    genome = "{{ genome }}"; 
     filteredData = data;
 
     renderCards(currentPage);
@@ -279,7 +301,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             {% else %}
                                 {% set headers = [
                                     {'text': 'STR Locus (hg38)', 'content': 'The chromosome, start position, and end position of the STR in the hg38 reference genome', 'column': 'chr'},
-                                    {'text': 'Start coordinate', 'content': 'Start of the STR location', 'column': 'start'},
                                     {'text': 'STR unit size', 'content': 'Size of the repeating unit of the STR', 'column': 'period'},
                                     {'text': 'Motif', 'content': 'The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC.', 'column': 'motif'},
                                     {'text': '# copies (hg38)', 'content': 'The number of consecutive copies of the repeat motif present in the hg38 reference genome.', 'column': 'copies'},
@@ -300,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </tr>
                     </thead>
                     <tbody id="card-container">
-                        <!-- Cards will be inserted here by JavaScript -->
+                        <!-- Cards for table inserted here by JS -->
                     </tbody>
                 </table>
             </div>
@@ -317,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
-                            <!-- Page numbers will be inserted here by JavaScript -->
+                            <!-- Page numbers inserted here by JS -->
                             <li class="page-item">
                                 <a class="page-link" href="#" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
@@ -357,7 +378,8 @@ document.addEventListener('DOMContentLoaded', function() {
               body {
                 background-color: #fff;
               }
-            
+
+              /* entries per page and search bar */
               .w-15 {
                 width: 15%;
               }
@@ -454,6 +476,9 @@ document.addEventListener('DOMContentLoaded', function() {
               .popover .arrow::after {
                 border-top-color: rgba(0, 0, 0, 0.8);
               }
+
+
+
             </style>
             
 {% endblock %}
