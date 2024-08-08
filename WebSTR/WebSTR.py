@@ -42,13 +42,10 @@ def search():
     
     gene_trace, gene_shapes, numgenes = GetGeneShapes(region_query, region_genome, BASEPATH)
     plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes)
-    
-    # Convert DataFrame to dictionary
-    data = region_data.to_dict(orient='records')
-    print("Region Data (dictionary format):", data)
+
     
     return render_template('view2.html',
-                           data=data,
+                           data=region_data.to_dict(orient='records'),
                            graphJSON=plotly_plot_json, 
                            layoutJSON=plotly_layout_json,
                            chrom=region_data["chr"].values[0].replace("chr",""),
@@ -156,7 +153,7 @@ def main():
             TEMPLATES_AUTO_RELOAD=True
         )
     # server.run(debug=FLASK_DEBUG, host=args.host, port=args.port)
-    server.run(debug=True, host=args.host, port=args.port)
+    server.run(debug=FLASK_DEBUG, host=args.host, port=args.port)
 
 if __name__ == '__main__':
     main()
