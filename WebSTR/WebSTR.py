@@ -37,15 +37,20 @@ def search():
     region_genome = request.args.get('genome')
     region_query = request.args.get('query').upper()
     region_data = GetRegionData(region_query, region_genome, BASEPATH)
-    if region_data.shape[0] == 0: return render_template('view2_nolocus.html')
+    if region_data.shape[0] == 0: 
+        return render_template('view2_nolocus.html')
+    
     gene_trace, gene_shapes, numgenes = GetGeneShapes(region_query, region_genome, BASEPATH)
     plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes)
+
+    
     return render_template('view2.html',
-                           table = region_data.to_records(index=False),
-                           graphJSON = plotly_plot_json, layoutJSON = plotly_layout_json,
-                           chrom = region_data["chr"].values[0].replace("chr",""),
-                           strids = list(region_data["strid"]),
-                           genome = region_genome) 
+                           data=region_data.to_dict(orient='records'),
+                           graphJSON=plotly_plot_json, 
+                           layoutJSON=plotly_layout_json,
+                           chrom=region_data["chr"].values[0].replace("chr",""),
+                           strids=list(region_data["strid"]),
+                           genome=region_genome)
 
 #################### Render locus page ###############
 @server.route('/locus')

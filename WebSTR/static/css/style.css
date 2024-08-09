@@ -1,6 +1,5 @@
 #header {
     background: #222;
-    /*padding: 10px 0;*/
 }
 
 #header-links {
@@ -109,7 +108,7 @@
 .hoverTable td{
                 padding:7px; border:#4e95f4 1px solid;
 }
-        /* Define the default color for all the table rows */
+
 
 th.allele_frequency_column {
     width: 150px;
@@ -138,85 +137,10 @@ th, td {
 
 /* tooltips - based on http://cbracco.me/a-simple-css-tooltip/ */
 /* Add this attribute to the element that needs a tooltip */
-[data-tooltip] {
-    position: relative;
-    z-index: 2;
-    cursor: pointer;
-}
-
-/* Hide the tooltip content by default */
-[data-tooltip]:before,
-[data-tooltip]:after {
-    visibility: hidden;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* Position tooltip above the element */
-[data-tooltip]:before {
-    position: absolute;
-    white-space: pre;
-    bottom: 150%;
-    left: 50%;
-    margin-bottom: 5px;
-    margin-left: -40px;
-    padding: 7px;
-    width: auto;
-    -webkit-border-radius: 3px;
-    -moz-border-radius:    3px;
-    border-radius:         3px;
-    background-color: #000;
-    background-color: hsla(0, 0%, 20%, 0.9);
-    color: #fff;
-    content: attr(data-tooltip);
-    text-align: center;
-    font-size: 12px;
-    line-height: 1.2;
-}
-
-/* Triangle hack to make tooltip look like a speech bubble */
-[data-tooltip]:after {
-    position: absolute;
-    bottom: 150%;
-    left: 50%;
-    margin-left: -5px;
-    width: 0;
-    border-top: 5px solid #000;
-    border-top: 5px solid hsla(0, 0%, 20%, 0.9);
-    border-right: 5px solid transparent;
-    border-left: 5px solid transparent;
-    content: " ";
-    font-size: 0;
-    line-height: 0;
-}
 
 
-.tg td{ width:100px }
 
-
-/* Show tooltip content on hover */
-[data-tooltip]:hover:before,
-[data-tooltip]:hover:after {
-    visibility: visible;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
-    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
-    opacity: 1;
-}
-
-
-/** @bw2 - class that shifts tooltip down to make it look better on variant table headers
-TODO: come up with a better way to position tooltip
-*/
-.tooltip-table-header:hover:before,
-.tooltip-table-header:hover:after,
-.tooltip-table-header:focus:before,
-.tooltip-table-header:focus:after {
-    -webkit-transform: translate(-5px, 7px);
-    -moz-transform:    translate(-5px, 7px);
-    transform:         translate(-5px, 7px);
-}
+/** @bw2 - class that shifts tooltip down to make it look better on variant table headers **/
 
 .variant_selector_group {
   display: flex;
