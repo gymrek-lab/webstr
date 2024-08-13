@@ -152,7 +152,7 @@ def main():
         server.config.update(
             TEMPLATES_AUTO_RELOAD=True
         )
-    server.run(debug=True, host=args.host, port=args.port)
+    server.run(debug=FLASK_DEBUG, host=args.host, port=args.port)
 
 if __name__ == '__main__':
     main()
