@@ -83,63 +83,71 @@ def GetRegionDataHg19(region_query, DbSTRPath):
 
     return df_hg19
 
-def createret(thecolor,betav,tissue,gene):
-    ret = '<span class="badge" data-toggle="tooltip" title=' + tissue + '&nbsp' + '(' + gene + ')' + ' style=background-color:' + thecolor + '>' + str(betav) + '</span>'     
+
+# set up for hg19 eSTR badges
+def createret(thecolor, betav, tissue, gene):
+    ret = f'<span class="badge popover-badge" data-toggle="popover" data-content="{tissue} ({gene})" style="background-color:{thecolor}; cursor: pointer;">{str(betav)}</span>'
     return ret
 
+
 def GetestrHTML(df):
-    df2 = pd.DataFrame(np.array(df).reshape(-1,2), columns= list("TR"))
-    t1 = df2["R"].str.split(pat=":",n= -1, expand = True)
-    df2['thtml']=None
-    delim = [', ',';']
-    nrows =t1.shape[0]
+    df2 = pd.DataFrame(np.array(df).reshape(-1, 2), columns=list("TR"))
+    t1 = df2["R"].str.split(pat=":", n=-1, expand=True)
+    df2['thtml'] = None
+    delim = [', ', ';']
+    nrows = t1.shape[0]
     for i in range(nrows):
         ret = '<h5>'
         df2t = df2.iloc[i]
         t2 = df2t["R"].split(":")
         for j in range(len(t2)):
-            t2t = t1.iloc[i,j]
-            t2=re.split(r'(?:' + '|'.join(delim) + r')', t2t )
+            t2t = t1.iloc[i, j]
+            t2 = re.split(r'(?:' + '|'.join(delim) + r')', t2t)
             t2num = float(t2[1])
             t2tissue = t2[0]
             t2gene = t2[2]
-            if (t2tissue.count('Adipose') > 0):
-               ret += createret("darkorange",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Artery-Aorta') > 0):
-               ret += createret("salmon",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Artery-Tibial') > 0):
-               ret += createret("red",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Brain_Caud') > 0):
-               ret += createret("lemonchiffon",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Brain_Cere') > 0):
-               ret += createret("yellow",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Cells') > 0):
-               ret += createret("skyblue",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Esophagus-Mucosa') > 0):
-               ret += createret("sienna",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Esophagus-Muscularis') > 0):
-               ret += createret("burlywood",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Heart') > 0):
-               ret += createret("darkviolet",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Lung') > 0):
-               ret += createret("greenyellow",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Muscle') > 0):
-               ret += createret("mediumslateblue",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Nerve') > 0):
-               ret += createret("gold",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Skin-Not') > 0):
-               ret += createret("blue",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Skin-Sun') > 0):
-               ret += createret("cornflowerblue",t2num,t2tissue,t2gene)
-            if (t2tissue.count('Thyroid') > 0):
-               ret += createret("green",t2num,t2tissue,t2gene)
-            if (t2tissue.count('WholeBlood') > 0):
-               ret += createret("purple",t2num,t2tissue,t2gene)
-        ret += '&nbsp;'
-        ret += '</h5>'
-        df2.iloc[i,2] = ret
-    df2.columns = ["str_id","tissues","thtml"]
+            color = "black"
+            if 'Adipose' in t2tissue:
+                color = "darkorange"
+            elif 'Artery-Aorta' in t2tissue:
+                color = "salmon"
+            elif 'Artery-Tibial' in t2tissue:
+                color = "red"
+            elif 'Brain_Caud' in t2tissue:
+                color = "lemonchiffon"
+            elif 'Brain_Cere' in t2tissue:
+                color = "yellow"
+            elif 'Cells' in t2tissue:
+                color = "skyblue"
+            elif 'Esophagus-Mucosa' in t2tissue:
+                color = "sienna"
+            elif 'Esophagus-Muscularis' in t2tissue:
+                color = "burlywood"
+            elif 'Heart' in t2tissue:
+                color = "darkviolet"
+            elif 'Lung' in t2tissue:
+                color = "greenyellow"
+            elif 'Muscle' in t2tissue:
+                color = "mediumslateblue"
+            elif 'Nerve' in t2tissue:
+                color = "gold"
+            elif 'Skin-Not' in t2tissue:
+                color = "blue"
+            elif 'Skin-Sun' in t2tissue:
+                color = "cornflowerblue"
+            elif 'Thyroid' in t2tissue:
+                color = "green"
+            elif 'WholeBlood' in t2tissue:
+                color = "purple"
+
+            ret += f'<span class="badge popover-badge" data-toggle="popover" data-content="{t2tissue} ({t2gene})" style="background-color:{color}; cursor: pointer;">{t2num}</span>'
+        
+        ret += '&nbsp;</h5>'
+        df2.iloc[i, 2] = ret
+    df2.columns = ["str_id", "tissues", "thtml"]
     return df2
+
+
 
 def GetHCalc(strid,DbSTRPath):
     ct = connect_db(DbSTRPath).cursor()

@@ -1,136 +1,485 @@
 {% extends "layout.html" %}
-
 {% block body %}
 
+<!-- plotly chart top of search page -->
 
-<!-- Div for the plotly chart -->
 <div id="chart" class="chart"></div>
-
-
 <script type="text/javascript">
-  var chrom  = {{chrom | tojson}};
-  var graphs = {{graphJSON | safe}};
-  var layout = {{layoutJSON | safe}};
-  var strids = {{strids | safe}};
+    var chrom = {{ chrom | tojson }};
+    var graphs = {{ graphJSON | safe }};
+    var layout = {{ layoutJSON | safe }};
+    var strids = {{ strids | safe }};
+    var myPlot = document.getElementById('chart'),
+        d3 = Plotly.d3,
+        data = graphs,
+        layout = layout;
+    var config = {
+        responsive: true 
+    };
 
-  var myPlot = document.getElementById('chart'),
-    d3 = Plotly.d3,
-    data = graphs,
-    layout=layout;
-
-  Plotly.newPlot('chart', data, layout);
-
-
-  myPlot.on('plotly_click', function(data){
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const genome = urlParams.get('genome');
-    for(var i=0; i < data.points.length; i++){
-        if (data.points[i].curveNumber==1) {
-          url="None";
+    Plotly.newPlot('chart', data, layout, config);
+    myPlot.on('plotly_click', function(data) {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const genome = urlParams.get('genome');
+        let url = "None";
+        for (var i = 0; i < data.points.length; i++) {
+            if (data.points[i].curveNumber == 1) {
+                url = "None";
+            } else {
+                if (genome == 'hg19') {
+                    url = "/locus?repeat_id=" + strids[data.points[i].pointNumber]
+                } else {
+                    url = "/locus?repeat_id=" + strids[data.points[i].pointNumber] + '&genome=hg38'
+                }
+            }
         }
-        else {
-          if (genome == 'hg19')  {
-            url="/locus?repeat_id="+strids[data.points[i].pointNumber]
-         } else {
-            url="/locus?repeat_id="+strids[data.points[i].pointNumber]+'&genome=hg38'
-         }
+        if (url != "None") {
+            var win = window.open(url, "_blank");
+            win.focus();
         }
+    });
+
+
+
+
+    
+    /*
+    This file contains JavaScript code that handles sorting, rendering cards, and rendering pagination for a table in the HTML document.
+    The code defines several variables and functions, including:
+    - sortOrder: an object that stores the sort order for each column
+    - filteredData: an array that stores the filtered data for the table
+    - currentPage: a variable that stores the current page number
+    - itemsPerPage: a variable that stores the number of items to display per page
+    - genome: a variable that stores the genome type
+    - sortTable(): a function that sorts the table data based on the selected column
+    - renderCards(): a function that renders the table cards based on the current page
+    - renderPagination(): a function that renders the pagination for the table
+    The code also includes event listeners and initialization code for the table.
+    */
+
+    let sortOrder = {};
+    let filteredData = [];
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let genome = "";
+    
+    function sortTable(column) {
+        console.log(`Sorting by column: ${column}`);
+        const order = sortOrder[column] === 'asc' ? 'desc' : 'asc';
+        sortOrder[column] = order;
+    
+        // Update sort icons
+        document.querySelectorAll('.sort-icon-up, .sort-icon-down').forEach(icon => {
+            icon.classList.remove('active');
+            icon.classList.add('neutral');
+        });
+    
+        const updateIcon = (icon, isActive) => {
+            icon.classList.toggle('active', isActive);
+            icon.classList.toggle('neutral', !isActive);
+        };
+    
+        updateIcon(document.querySelector(`.sort-icon-up[data-column="${column}"]`), order === 'asc');
+        updateIcon(document.querySelector(`.sort-icon-down[data-column="${column}"]`), order === 'desc');
+    
+        filteredData.sort((a, b) => {
+            if (column === 'chr') {
+                if (a[column] === b[column]) {
+                    return order === 'asc' ? a['start'] - b['start'] : b['start'] - a['start'];
+                }
+                return order === 'asc' ? a[column].localeCompare(b[column]) : b[column].localeCompare(a[column]);
+            }
+            return order === 'asc' ? (a[column] < b[column] ? -1 : 1) : (a[column] > b[column] ? -1 : 1);
+        });
+    
+        renderCards(currentPage);
+        renderPagination();
     }
-    if (url != "None") {
-    var win = window.open(url, "_blank");
-    win.focus();
-    }
+
+
+    // Function to render cards
+    function renderCards(page) {
+        const cardContainer = document.getElementById('card-container');
+        cardContainer.innerHTML = '';
+
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageData = filteredData.slice(start, end);
+
+        pageData.forEach(item => {
+            const row = document.createElement('tr');
+
+            const createCell = (content, isHTML = false) => {
+                const cell = document.createElement('td');
+                if (isHTML) {
+                    cell.innerHTML = content;
+                } else {
+                    cell.innerText = content;
+                }
+                row.appendChild(cell);
+            };
+
+            const strLocusLink = `<a href="/locus?repeat_id=${item.strid}&genome=${genome}" target="_blank">${item.chr}:${item.start}-${item.end}</a>`;
+            createCell(strLocusLink, true);
+
+            if (genome === 'hg19') {
+                createCell(item.motif);
+                createCell(item.length !== undefined ? `${parseFloat(item.length).toFixed(1)}` : 'N/A');
+                createCell(item.thtml || 'N/A', true);
+                createCell(item.Hhtml || 'N/A', true);
+            } else {
+                createCell(item.period || 'N/A');
+                createCell(item.motif);
+                createCell(item.copies || 'N/A');
+                createCell(item.panel || 'N/A');
+            }
+
+            cardContainer.appendChild(row);
+        });
+
+        const entriesInfo = document.getElementById('entriesInfo');
+        entriesInfo.innerText = `Showing ${start + 1} to ${Math.min(end, filteredData.length)} of ${filteredData.length} entries`;
+}
+
+    // Function to render pagination
+    function renderPagination() {
+        const pagination = document.querySelector('.pagination');
+        pagination.innerHTML = '';
+
+        const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+
+        const createPageItem = (page, text, isDisabled = false, isActive = false) => {
+            const pageItem = document.createElement('li');
+            pageItem.className = 'page-item' + (isDisabled ? ' disabled' : '') + (isActive ? ' active' : '');
+            const pageLink = document.createElement('a');
+            pageLink.className = 'page-link';
+            pageLink.href = '#';
+            pageLink.innerText = text;
+            pageLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!isDisabled) {
+                    currentPage = page;
+                    renderCards(currentPage);
+                    renderPagination();
+                }
+            });
+            pageItem.appendChild(pageLink);
+            return pageItem;
+        };
+
+        pagination.appendChild(createPageItem(currentPage - 1, '«', currentPage === 1));
+
+        const maxPagesToShow = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+        let endPage = Math.min(pageCount, startPage + maxPagesToShow - 1);
+
+        if (startPage > 1) {
+            pagination.appendChild(createPageItem(1, '1'));
+            if (startPage > 2) {
+                pagination.appendChild(createPageItem(null, '...', true));
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pagination.appendChild(createPageItem(i, i, false, i === currentPage));
+        }
+
+        if (endPage < pageCount) {
+            if (endPage < pageCount - 1) {
+                pagination.appendChild(createPageItem(null, '...', true));
+            }
+            pagination.appendChild(createPageItem(pageCount, pageCount));
+        }
+
+        pagination.appendChild(createPageItem(currentPage + 1, '»', currentPage === pageCount));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const data = {{ data | tojson }};
+    genome = "{{ genome }}"; 
+    filteredData = data;
+
+    renderCards(currentPage);
+    renderPagination();
+
+    document.getElementById('entriesPerPage').addEventListener('change', function() {
+        itemsPerPage = parseInt(this.value);
+        currentPage = 1;
+        renderCards(currentPage);
+        renderPagination();
+    });
+
+    document.getElementById('tableSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filteredData = data.filter(item => {
+            const commonConditions = item.chr.toLowerCase().includes(searchTerm) ||
+                                     item.start.toString().includes(searchTerm) ||
+                                     item.end.toString().includes(searchTerm) ||
+                                     item.motif.toLowerCase().includes(searchTerm);
+            if (genome === 'hg19') {
+                return commonConditions ||
+                       item.thtml?.toLowerCase().includes(searchTerm) ||
+                       item.Hhtml?.toLowerCase().includes(searchTerm);
+            } else {
+                return commonConditions ||
+                       item.panel?.toLowerCase().includes(searchTerm);
+            }
+        });
+        currentPage = 1;
+        renderCards(currentPage);
+        renderPagination();
+    });
+
+    const initializePopover = (selector, triggerEvent) => {
+        $(document).on(triggerEvent, selector, function() {
+            $(this).popover({
+                container: 'body',
+                trigger: triggerEvent === 'mouseenter' ? 'hover' : 'click',
+                placement: 'top'
+            }).popover(triggerEvent === 'mouseenter' ? 'show' : 'toggle');
+        });
+
+        if (triggerEvent === 'mouseenter') {
+            $(document).on('mouseleave', selector, function() {
+                $(this).popover('hide');
+            });
+        }
+    };
+
+    initializePopover('.popover-table-header', 'mouseenter');
+    initializePopover('.popover-badge', 'mouseenter');
 });
-
-$(document).ready(function(){
-  $('[data-toggle="tooltip"]').tooltip(); 
-  $('#strTable').DataTable();
-});
-
-
 </script>
-<style>
-mark.red {
-    color:#ff0000;
-    background: white;}
-mark.gray {
-    color:gray;
-    background: white;}
-mark.gold {
-    color:gold;
-    background: white;}
-mark.blue {
-    color:blue;
-    background: white;}
-mark.purple {
-    color:purple;
-    background: white;}
-mark.green {
-    color:green;
-    background: white;}
-
-</style>
-
-<div id="plotLegend" class="plotfooter"></div>
-
-<!-- Main table of STRs in this region -->
 
 <div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            {% if genome == 'hg19' %}
+            <h3>STR locations found in hg19</h3>
+            <p>
+                <b>Motif length:</b> <mark class="gray">1: gray</mark>,
+                <mark class="red">2: red</mark>, <mark class="gold">3: gold</mark>,
+                <mark class="blue">4: blue</mark>,
+                <mark class="purple">5: purple</mark>,
+                <mark class="green">6: green</mark>
+            </p>
+            <h6>Hover over table column headings to display additional details</h6>
+            {% else %}
+            <h3>STR locations found in hg38</h3>
+            {% endif %}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="entriesPerPage">Show</label>
+                    <select id="entriesPerPage" class="form-control d-inline-block w-15">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <label for="entriesPerPage">entries</label>
+                </div>
+                <div class="col-md-6 text-right">
+                    <label for="tableSearch">Search:</label>
+                    <input id="tableSearch" type="text" class="form-control d-inline-block w-15" />
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="myTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            {% if genome == 'hg19' %}
+                                {% set headers = [
+                                    {'text': 'STR Locus (hg19)', 'content': 'The chromosome, start position, and end position of the STR in the hg19 reference genome', 'column': 'chr'},
+                                    {'text': 'Motif', 'content': 'The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC.', 'column': 'motif'},
+                                    {'text': '# copies (hg19)', 'content': 'The number of consecutive copies of the repeat motif present in the hg19 reference genome.', 'column': 'length'},
+                                    {'text': 'eSTRs (FDR<0.1)', 'content': 'eSTRs are STRs whose lengths are linearly associated with expression of nearby genes. Each circle gives the effect size of significant eSTRs identified in the GTEx cohort (Fotsing et al. Nature Genetics 2019). Circles are color-coded by tissue. Hover over a circle to see the tissue and target gene of each eSTR. Click on an STR to see more information about eSTR effects.', 'column': 'thtml'},
+                                    {'text': 'Heterozygosity', 'content': 'Heterozygosity gives a measure of how polymorphic the STR is. It is computed as 1-(sum of squared frequency of each allele). Values close to 1 indicate highly polymorphic STRs. Values close to 0 indicate an STR that is mostly not variable in the population.', 'column': 'Hhtml'}
+                                ] %}
+                            {% else %}
+                                {% set headers = [
+                                    {'text': 'STR Locus (hg38)', 'content': 'The chromosome, start position, and end position of the STR in the hg38 reference genome', 'column': 'chr'},
+                                    {'text': 'STR unit size', 'content': 'Size of the repeating unit of the STR', 'column': 'period'},
+                                    {'text': 'Motif', 'content': 'The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC.', 'column': 'motif'},
+                                    {'text': '# copies (hg38)', 'content': 'The number of consecutive copies of the repeat motif present in the hg38 reference genome.', 'column': 'copies'},
+                                    {'text': 'Reference panel', 'content': 'Which repeat panel STR belongs to', 'column': 'panel'}
+                                ] %}
+                            {% endif %}
+                            {% for header in headers %}
+                                <th>
+                                    <div class="popover-table-header" data-toggle="popover" data-content="{{ header.content }}">
+                                        <span class="header-text">{{ header.text }}</span>
+                                    </div>
+                                    <div class="sort-icons-container">
+                                        <span class="sort-icon-up neutral" data-column="{{ header.column }}" onclick="sortTable('{{ header.column }}')">↑</span>
+                                        <span class="sort-icon-down neutral" data-column="{{ header.column }}" onclick="sortTable('{{ header.column }}')">↓</span>
+                                    </div>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody id="card-container">
+                        <!-- Cards for table inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <span id="entriesInfo"></span>
+                </div>
+                <div class="col-md-6">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <!-- Page numbers inserted here by JS -->
+                            <li class="page-item">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            
+            <style>
+              mark.red {
+                color: #ff0000;
+                background: white;
+              }
+              mark.gray {
+                color: gray;
+                background: white;
+              }
+              mark.gold {
+                color: gold;
+                background: white;
+              }
+              mark.blue {
+                color: blue;
+                background: white;
+              }
+              mark.purple {
+                color: purple;
+                background: white;
+              }
+              mark.green {
+                color: green;
+                background: white;
+              }
+            
+              body {
+                background-color: #fff;
+              }
 
-  <div class="row justify-content-center">
-    <div class="col-md-10 col-md-offset-1">
+              /* entries per page and search bar */
+              .w-15 {
+                width: 15%;
+              }
+            
+              .pagination-container {
+                display: flex;
+                justify-content: center;
+              }
+            
+              .table-responsive {
+                overflow: visible;
+              }
+            
+              .table {
+                color: #333;
+              }
+            
+              .table th,
+              .table td {
+                border: 1px solid #ddd;
+              }
+            
+              .table th {
+                background-color: #f1f1f1;
+                position: relative;
+                white-space: normal; 
+                padding-right: 2em;
+              }
+            
+              .header-text {
+                display: inline-block;
+                text-decoration: underline dotted;
+              }
+            
+              .sort-icons-container {
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                display: flex;
+                flex-direction: row;
+                margin: 0 0.5em 0 0;
+              }
+            
+              .sort-icon-up,
+              .sort-icon-down {
+                cursor: pointer;
+                font-size: 1.2em;
+                display: inline-block;
+                outline: none;
+                user-select: none;
+                position: relative;
+                margin: 0 -5px 0 0;
+              }
+            
+              .sort-icon-up.active,
+              .sort-icon-down.active {
+                color: #4874e4;
+                background-color: transparent;
+              }
+            
+              .sort-icon-up.neutral,
+              .sort-icon-down.neutral {
+                color: #bbb;
+              }
+            
+              .badge {
+                cursor: pointer;
+                user-select: none;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+              }
+            
+              .popover-table-header {
+                cursor: pointer;
+                display: inline-block;
+              }
+            
+              .popover {
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+              }
+            
+              .popover-header {
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+              }
+            
+              .popover-body {
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+              }
+            
+              .popover .arrow::after {
+                border-top-color: rgba(0, 0, 0, 0.8);
+              }
 
-      {% if genome == 'hg19' %}
-      <h3>STR locations found in hg19</h3>  
-      <p> <b> Motif length:</b> <mark class="gray"> 1: gray, <mark class="red"> 2: red , <mark class="gold"> 3: gold, <mark class="blue"> 4: blue, <mark class="purple"> 5: purple, <mark class="green"> 6: green </p>
-      <h6> Hover over table column headings to display addtional details </h6>  
-        <div id="variants_table_container" style>  
-      <table border="1" cellpadding="5" cellspacing="5" class="table table-bordered">
-        <thead class="tablesorter-header"><th><abbr title="The chromosome, start position, and end position of the STR in the hg19 reference genome"> STR Locus (hg19)</abbr></th><th><abbr title="The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC."> Motif</th></abbr><th><abbr title="The number of consecutive copies of the repeat motif present in the hg19 reference genome."># copies (hg19)</abbr></th><th><abbr title="eSTRs are STRs whose lengths are linearly associated with expression of nearby genes. Each circle gives the effect size of significant eSTRs identified in the GTEx cohort (Fotsing et al. Nature Genetics 2019). Circles are color-coded by tissue. Hover over a circle to see the tissue and target gene of each eSTR. Click on an STR to see more information about eSTR effects.">  eSTRs (FDR<0.1)</abbr>  </th> <th><abbr title="Heterozygosity gives a measure of how polymorphic the STR is. It is computed as 1-(sum of squared frequency of each allele). Values close to 1 indicate highly polymorphic STRs. Values close to 0 indicate an STR that is mostly not variable in the population."> Heterozygosity </abbr></th></thead>
-        <tbody>
-        {% for d in table %}
-        <tr>
-          <td><a href="/locus?repeat_id={{d[6]}}" target="_blank"> {{ d[0] }}:{{ d [1] }}-{{ d[2] }}</a></td>
-          <td>{{ d[3] }}</td>
-          <td>{{'%0.1f' % d[5]|float}}</td>
-                <td>{{ d[13] | safe }}</td>
-                <td>{{ d[10] | safe }}</td>
-          
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-      {% endif %}
 
-      {% if genome == 'hg38' %}
-      <h3>STR locations found in hg38</h3>  
-        <div id="variants_table_container" style>  
-  
-          <table id="strTable" border="1" cellpadding="2" cellspacing="2" class="table table-bordered">
-            <thead class="tablesorter-header"><th>
-              <abbr title="The chromosome, start position, and end position of the STR in the hg38 reference genome"> STR Locus (hg38)</abbr></th>
-              <th><abbr title="Size of the repeating unit of the STR"> STR unit size </abbr>  </th>
-              <th><abbr title="The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC."> Motif</th></abbr>
-              <th><abbr title="The number of consecutive copies of the repeat motif present in the hg38 reference genome."># copies (hg38)</abbr></th>
-              <th><abbr title="Which repeat panel STR belongs to "> Reference panel</abbr>  </th> 
-            </thead>
-            <tbody>
-            {% for d in table %}
-            <tr>
-              <td><a href="/locus?repeat_id={{d[0]}}&genome=hg38" target="_blank"> 
-                {{ d[1] }}:{{ d [2] }}-{{ d[3] }}</a></td>
-               <td>{{ d[6] }}</td>
-              <td>{{ d[5] }}</td>
-              <td>{{d[7]}}</td>
-              <td>{{ d[15] | safe }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-          {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
+
+            </style>
+            
+
 {% endblock %}
+
