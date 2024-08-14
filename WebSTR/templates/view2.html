@@ -231,24 +231,50 @@ document.addEventListener('DOMContentLoaded', function() {
         renderPagination();
     });
 
-    const initializePopover = (selector, triggerEvent) => {
-        $(document).on(triggerEvent, selector, function() {
+    const initializePopover = (selector) => {
+    $(document).on('mouseenter', selector, function() {
+        const _this = this;
+
+        // Hide any currently visible popovers to avoid multiple being shown at once
+        $('[data-toggle="popover"]').not(_this).popover('hide');
+
+        if (!$(this).data('bs.popover')) {
             $(this).popover({
                 container: 'body',
-                trigger: triggerEvent === 'mouseenter' ? 'hover' : 'click',
-                placement: 'top'
-            }).popover(triggerEvent === 'mouseenter' ? 'show' : 'toggle');
-        });
-
-        if (triggerEvent === 'mouseenter') {
-            $(document).on('mouseleave', selector, function() {
-                $(this).popover('hide');
-            });
+                trigger: 'manual',
+                placement: 'top',
+                html: true,
+            }).popover('show');
+        } else {
+            $(this).popover('show');
         }
-    };
 
-    initializePopover('.popover-table-header', 'mouseenter');
-    initializePopover('.popover-badge', 'mouseenter');
+        // Show popover when mouse enters popover
+        $('.popover').off('mouseenter mouseleave').on('mouseenter', function() {
+            $(_this).popover('show');
+        }).on('mouseleave', function() {
+            setTimeout(function() {
+                if (!$(_this).is(':hover') && !$('.popover:hover').length) {
+                    $(_this).popover('hide');
+                }
+            }, 100);
+        });
+    });
+
+    $(document).on('mouseleave', selector, function() {
+        const _this = this;
+        setTimeout(function() {
+            if (!$(_this).is(':hover') && !$('.popover:hover').length) {
+                $(_this).popover('hide');
+            }
+        }, 100);
+    });
+};
+
+
+initializePopover('.popover-table-header');
+initializePopover('.popover-badge');
+
 });
 </script>
 
@@ -292,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             {% if genome == 'hg19' %}
                                 {% set headers = [
                                     {'text': 'STR Locus (hg19)', 'content': 'The chromosome, start position, and end position of the STR in the hg19 reference genome', 'column': 'chr'},
-                                    {'text': 'Motif', 'content': 'The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC.', 'column': 'motif'},
+                                    {'text': 'Motif', 'content': 'The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC. Learn more about the TRAL annotation method <a href="https://acg-team.github.io/tral/index.html" target="_blank"> here.</a>', 'column': 'motif'},
                                     {'text': '# copies (hg19)', 'content': 'The number of consecutive copies of the repeat motif present in the hg19 reference genome.', 'column': 'length'},
                                     {'text': 'eSTRs (FDR<0.1)', 'content': 'eSTRs are STRs whose lengths are linearly associated with expression of nearby genes. Each circle gives the effect size of significant eSTRs identified in the GTEx cohort (Fotsing et al. Nature Genetics 2019). Circles are color-coded by tissue. Hover over a circle to see the tissue and target gene of each eSTR. Click on an STR to see more information about eSTR effects.', 'column': 'thtml'},
                                     {'text': 'Heterozygosity', 'content': 'Heterozygosity gives a measure of how polymorphic the STR is. It is computed as 1-(sum of squared frequency of each allele). Values close to 1 indicate highly polymorphic STRs. Values close to 0 indicate an STR that is mostly not variable in the population.', 'column': 'Hhtml'}
@@ -301,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 {% set headers = [
                                     {'text': 'STR Locus (hg38)', 'content': 'The chromosome, start position, and end position of the STR in the hg38 reference genome', 'column': 'chr'},
                                     {'text': 'STR unit size', 'content': 'Size of the repeating unit of the STR', 'column': 'period'},
-                                    {'text': 'Motif', 'content': 'The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC.', 'column': 'motif'},
+                                    {'text': 'Motif', 'content': 'The motif (repeat unit) of each STR is given in canonical format. The canonical repeat unit is defined as the lexicographically first repeat unit when considering all rotations and strand orientations of the repeat sequence. For example, the canonical repeat unit for the repeat sequence CAGCAGCAGCAG would be AGC. Learn more about the TRAL annotation method <a href="https://acg-team.github.io/tral/index.html" target="_blank"> here.</a>', 'column': 'motif'},
                                     {'text': '# copies (hg38)', 'content': 'The number of consecutive copies of the repeat motif present in the hg38 reference genome.', 'column': 'copies'},
                                     {'text': 'Reference panel', 'content': 'Which repeat panel STR belongs to', 'column': 'panel'}
                                 ] %}
