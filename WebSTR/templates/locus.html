@@ -42,10 +42,10 @@ $(document).ready(function() {
 			{{ strseq|safe }}
 		  </p>
 		</div>
-		<button class="collapsible active">Gene mapping</button>
+		<button class="collapsible active">Gene Information</button>
 		<div class="content">
 		  {% if gene_name == "" %}
-		  <p>No gene information available</p>
+		  <p>No information available</p>
 		  {% else %}
 		  <p>Maps to {{ gene_name }}, {{ gene_desc }}</p>
 		  {% endif %}
