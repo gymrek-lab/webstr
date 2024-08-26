@@ -11,13 +11,13 @@ from dbutils import *
 from utils import *
 
 # Global plotting variables
-GENEBUFFER = 0.1
+
 EXON_WIDTH = 0.3
 GENE_WIDTH = 0.03
 GENE_COLOR = "black"
 
 # Set up API
-API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+API_URL = os.environ.get("WEBSTR_API_URL",'http://localhost:5000')
 
 def GetGeneShapes(region_query, region_genome, DbSTRPath=None):
     region_query = CleanRegionQuery(region_query)
@@ -36,7 +36,7 @@ def GetGeneShapes(region_query, region_genome, DbSTRPath=None):
         gene = gene_features[i]
         if (gene['start'] < min_start): min_start = gene['start']
         if (gene['end'] > max_end): max_end = gene['end'] 
-        buf = int((max_end-min_start)*(GENEBUFFER))
+        buf = int((max_end-min_start))
         max_end = max_end + buf
         min_start = min_start - buf
 
@@ -89,6 +89,8 @@ def GetSTRColor(period):
 
 def GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes):
     chrom = region_data["chr"].values[0].replace("chr","")
+
+
     
     # Get points for each STR
     trace1 = go.Scatter(
@@ -100,6 +102,8 @@ def GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes):
         hoverinfo='text'
     )
     plotly_data = [trace1, gene_trace]
+
+
     plotly_layout= go.Layout(
         height=300+50*numgenes,
         hovermode= 'closest',
@@ -123,11 +127,19 @@ def GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes):
             showticklabels=False
         )
     )
+
     plotly_plot_json = json.dumps(plotly_data, cls=plotly.utils.PlotlyJSONEncoder) 
     plotly_layout_json = json.dumps(plotly_layout, cls=plotly.utils.PlotlyJSONEncoder)
+
     return plotly_plot_json, plotly_layout_json
 
 def GetGeneText(gene_name, strand):
+
+    #TODO: determine in "unknown" is preferable 
+    if gene_name is None:
+        gene_name = ""  
+
+
     txt = "<i>"
     if strand == "+":
         txt += gene_name + " " + "&#8594;"
@@ -175,107 +187,27 @@ def ExtractGeneFeaturesHg19(region_query, DbSTRPath):
 
 ######### Functions for hg38 versions ##########
 def ExtractGeneFeaturesAPI(region_query):
-   """
-   Extracts gene features from the API based on the given region query or gene names/Ensembl IDs.
-   Args:
-       region_query (str): The region query or gene names/Ensembl IDs.
-   Returns:
-       list: A list of gene features extracted from the API.
-   """
-   # Threshold distance to merge nearby exons
-   merge_distance_threshold = 50
 
 
-   # Check if the query is for a region
-   if ":" in region_query:
-       # Use the /repeats endpoint to get all STRs in the region
-       gene_url = f"{API_URL}/repeats?region_query={region_query}"
-      
-       # Fetch data from the API
-       resp = requests.get(gene_url)
-      
-       # Check if the API call was successful
-       if resp.status_code != 200:
-           print(f"Error: API call failed with status code {resp.status_code}")
-           return []
+    if region_query.find(":") < 0:
+        if region_query.find("ENSG") == 0:
+            gene_url = API_URL + '/genefeatures/?ensembl_ids=' + region_query
+        else:
+            gene_url = API_URL + '/genefeatures/?gene_names=' + region_query
+    else:
+        gene_url = API_URL + '/genefeatures/?reqion_query=' + region_query
 
 
-       try:
-           str_data = resp.json()
-       except json.JSONDecodeError:
-           print("Failed to parse JSON response")
-           return []
-       # Check if the response is empty
-       if not str_data: 
-           return []
+    resp = requests.get(gene_url)
 
+    try:
+        gene_features = json.loads(resp.text)
+    except json.JSONDecodeError as e:
+        print(f"Failed to decode")
+        gene_features = None
+    
+    if gene_features is None:
+        return []
 
-       gene_dict = {}
-       for entry in str_data:
-           gene_id = entry.get("ensembl_id")
-           gene_name = entry.get("gene_name")
-           strand = entry.get("strand")
-           start = entry.get("start")
-           end = entry.get("end")
-          
-           # Check if gene_id and gene_name are present
-           if gene_id and gene_name: 
-               if gene_id not in gene_dict:
-                   gene_dict[gene_id] = {
-                       "name": gene_name,
-                       "strand": strand,
-                       "start": start,
-                       "end": end,
-                       "exons": [{"start": start, "end": end}]
-                   }
-               else:
-                   # Update start and end boundaries
-                   gene_dict[gene_id]["start"] = min(gene_dict[gene_id]["start"], start)
-                   gene_dict[gene_id]["end"] = max(gene_dict[gene_id]["end"], end)
-                   gene_dict[gene_id]["exons"].append({"start": start, "end": end})
-
-
-       # Merge nearby exons within the merge_distance_threshold
-       for gene_id, gene_info in gene_dict.items():
-           merged_exons = []
-           sorted_exons = sorted(gene_info["exons"], key=lambda x: x["start"])
-          
-           current_exon = sorted_exons[0]
-           for next_exon in sorted_exons[1:]:
-               if next_exon["start"] - current_exon["end"] <= merge_distance_threshold:
-                   # Extend the current exon
-                   current_exon["end"] = max(current_exon["end"], next_exon["end"])
-               else:
-                   # Append the current exon and move to the next
-                   merged_exons.append(current_exon)
-                   current_exon = next_exon
-           # Append the last exon
-           merged_exons.append(current_exon)
-
-
-           # Update the gene info with merged exons
-           gene_info["exons"] = merged_exons
-
-
-       # Convert gene_dict to a list of gene features
-       gene_features = list(gene_dict.values())
-      
-   else:
-       # If it's not a region query, use the original logic for gene names and Ensembl IDs
-       if region_query.startswith("ENSG"):
-           gene_url = f"{API_URL}/genefeatures/?ensembl_ids={region_query}"
-       else:
-           gene_url = f"{API_URL}/genefeatures/?gene_names={region_query}"
-      
-       resp = requests.get(gene_url)
-       gene_features = json.loads(resp.text)
-       if gene_features is None:
-           return []
-  
-   # Print the merged gene features
-   for gene_info in gene_features:
-       print(f"Gene: {gene_info['name']}, Start: {gene_info['start']}, End: {gene_info['end']}, Exons: {gene_info['exons']}")
-
-
-   return gene_features
-
+    
+    return gene_features
