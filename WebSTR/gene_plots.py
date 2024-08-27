@@ -195,7 +195,7 @@ def ExtractGeneFeaturesAPI(region_query):
         else:
             gene_url = API_URL + '/genefeatures/?gene_names=' + region_query
     else:
-        gene_url = API_URL + '/genefeatures/?reqion_query=' + region_query
+        gene_url = API_URL + '/genefeatures/?region_query=' + region_query
 
 
     resp = requests.get(gene_url)
