@@ -40,8 +40,12 @@ def search():
     if region_data.shape[0] == 0: 
         return render_template('view2_nolocus.html')
     
-    gene_trace, gene_shapes, numgenes = GetGeneShapes(region_query, region_genome, BASEPATH)
-    plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes)
+     # Update the call to GetGeneShapes to capture all four return values
+    gene_trace, gene_shapes, annotations, numgenes = GetGeneShapes(region_query, region_genome, BASEPATH)
+    
+    # Pass all the necessary variables to GetGenePlotlyJSON
+    plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, annotations, numgenes)
+
 
     
     return render_template('view2.html',

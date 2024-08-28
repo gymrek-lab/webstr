@@ -9,10 +9,12 @@
     var graphs = {{ graphJSON | safe }};
     var layout = {{ layoutJSON | safe }};
     var strids = {{ strids | safe }};
+
     var myPlot = document.getElementById('chart'),
         d3 = Plotly.d3,
         data = graphs,
         layout = layout;
+    
     var config = {
         responsive: true 
     };
@@ -28,17 +30,37 @@
                 url = "None";
             } else {
                 if (genome == 'hg19') {
-                    url = "/locus?repeat_id=" + strids[data.points[i].pointNumber]
+                    url = "/locus?repeat_id=" + strids[data.points[i].pointNumber];
                 } else {
-                    url = "/locus?repeat_id=" + strids[data.points[i].pointNumber] + '&genome=hg38'
+                    url = "/locus?repeat_id=" + strids[data.points[i].pointNumber] + '&genome=hg38';
                 }
             }
         }
+
         if (url != "None") {
             var win = window.open(url, "_blank");
             win.focus();
         }
     });
+
+    myPlot.on('plotly_clickannotation', function(event) {
+
+        const annotation = event.annotation;
+    
+        const geneName = annotation.hovertext ? annotation.hovertext.split(' ')[0] : null;
+       
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const genome = urlParams.get('genome');
+
+
+        if (geneName) {
+            let url = `search?genome=${genome}&query=${geneName}`;
+            window.open(url, "_blank");
+        }
+
+    });
+
 
 
 
@@ -65,7 +87,6 @@
     let genome = "";
     
     function sortTable(column) {
-        console.log(`Sorting by column: ${column}`);
         const order = sortOrder[column] === 'asc' ? 'desc' : 'asc';
         sortOrder[column] = order;
     
