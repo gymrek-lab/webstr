@@ -19,7 +19,7 @@ from gene_plots import *
 from dash_graphs import add_dash_graphs_to_flask_server
 
 # Grab environment variables
-API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-db.ucsd.edu')
 BASEPATH =  os.environ.get("BASEPATH", "/storage/resources/dbase/human/")
 
 #################### Data paths ###############
@@ -36,14 +36,21 @@ add_dash_graphs_to_flask_server(server)
 def search():
     region_genome = request.args.get('genome')
     region_query = request.args.get('query').upper()
-    region_data = GetRegionData(region_query, region_genome, BASEPATH)
-    if region_data.shape[0] == 0: 
-        return render_template('view2_nolocus.html')
+
+    # Get the data for the region
+    try:
+        region_data = GetRegionData(region_query, region_genome, BASEPATH)
+        print(f"Region Data: {region_data}")  # Print to see what's returned
+    except Exception as e:
+        print(f"Error while fetching region data: {str(e)}")
+        return render_template('500.html', emsg="Error while fetching region data"), 500
     
+    if region_data.shape[0] == 0:
+        return render_template('view2_nolocus.html')
+
     gene_trace, gene_shapes, numgenes = GetGeneShapes(region_query, region_genome, BASEPATH)
     plotly_plot_json, plotly_layout_json = GetGenePlotlyJSON(region_data, gene_trace, gene_shapes, numgenes)
 
-    
     return render_template('view2.html',
                            data=region_data.to_dict(orient='records'),
                            graphJSON=plotly_plot_json, 
@@ -51,6 +58,7 @@ def search():
                            chrom=region_data["chr"].values[0].replace("chr",""),
                            strids=list(region_data["strid"]),
                            genome=region_genome)
+
 
 #################### Render locus page ###############
 @server.route('/locus')
@@ -63,21 +71,53 @@ def locusview():
         reffa = pyfaidx.Fasta(RefFaPath_hg38)
     else:
         reffa = pyfaidx.Fasta(RefFaPath_hg19)
-    strinfo = GetSTRInfo(str_query, genome_query, BASEPATH, reffa)
-    if strinfo is None: return render_template('view2_nolocus.html')
-    
-    # Plotting info
-    plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON(genome_query, strinfo["freq_dist"])
 
-    # Render
-    return render_template('locus.html', strid=str_query,
-                           graphJSONx=plotly_plot_json_datab, graphlayoutx=plotly_plot_json_layoutb, 
-                           chrom=strinfo["chrom"], start=strinfo["start"], end=strinfo["end"], 
-                           strseq=strinfo["seq"], gene_name=strinfo["gene_name"], gene_desc=strinfo["gene_desc"],
-                           motif=strinfo["motif"], copies=strinfo["copies"], crc_data=strinfo["crc_data"],
-                           estr=strinfo["gtex_data"], mut_data=strinfo["mut_data"],
-                           imp_data=strinfo["imp_data"], imp_allele_data=strinfo["imp_allele_data"],
-                           seq_data=strinfo["seq_data"])
+    try:
+        strinfo = GetSTRInfo(str_query, genome_query, BASEPATH, reffa)
+        print(f"STR Info: {strinfo}")  # Debug statement
+        
+        if strinfo is None: 
+            print(f"No STR info found for {str_query}")  # Debug statement
+            return render_template('view2_nolocus.html')
+
+        # Safely access 'frequency' and handle null
+        frequency_value = strinfo.get('frequency', None)
+        print(f"Frequency Value: {frequency_value}")  # Debug statement
+        
+        # If 'freq_dist' is empty or None, handle it safely
+        freq_dist = strinfo.get("freq_dist", pd.DataFrame())
+        if isinstance(freq_dist, pd.DataFrame) and freq_dist.empty:
+            print("Frequency data is empty, skipping plot generation.")  # Debug statement
+            plotly_plot_json_datab, plotly_plot_json_layoutb = dict(), dict()  # Return empty data
+        else:
+            plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON(genome_query, freq_dist)
+
+    except Exception as e:
+        print(f"Error fetching STR info: {e}")  # Debug statement
+        return render_template('500.html', emsg="Error fetching STR info"), 500
+
+    # Render the locus page
+    return render_template('locus.html', 
+                           strid=str_query,
+                           graphJSONx=plotly_plot_json_datab,
+                           graphlayoutx=plotly_plot_json_layoutb,
+                           chrom=strinfo.get("chrom", "N/A"), 
+                           start=strinfo.get("start", "N/A"), 
+                           end=strinfo.get("end", "N/A"), 
+                           strseq=strinfo.get("seq", "N/A"), 
+                           gene_name=strinfo.get("gene_name", "N/A"), 
+                           gene_desc=strinfo.get("gene_desc", "N/A"),
+                           motif=strinfo.get("motif", "N/A"), 
+                           copies=strinfo.get("copies", "N/A"), 
+                           crc_data=strinfo.get("crc_data", "N/A"),
+                           estr=strinfo.get("gtex_data", "N/A"), 
+                           mut_data=strinfo.get("mut_data", "N/A"),
+                           imp_data=strinfo.get("imp_data", "N/A"), 
+                           imp_allele_data=strinfo.get("imp_allele_data", "N/A"),
+                           seq_data=strinfo.get("seq_data", "N/A"))
+
+
+
 
 #################### Render other HTML pages ###############
 

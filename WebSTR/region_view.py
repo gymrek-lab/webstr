@@ -7,6 +7,7 @@ from dbutils import *
 from utils import *
 
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+print(API_URL)
 
 def GetRegionData(region_query, region_genome, DbSTRPath=None):
     if region_genome == "hg19":
