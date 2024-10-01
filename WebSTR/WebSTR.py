@@ -74,33 +74,28 @@ def locusview():
 
     try:
         strinfo = GetSTRInfo(str_query, genome_query, BASEPATH, reffa)
-        print(f"STR Info: {strinfo}")  # Debug statement
-        
+
         if strinfo is None: 
-            print(f"No STR info found for {str_query}")  # Debug statement
             return render_template('view2_nolocus.html')
 
-        # Safely access 'frequency' and handle null
-        frequency_value = strinfo.get('frequency', None)
-        print(f"Frequency Value: {frequency_value}")  # Debug statement
-        
-        # If 'freq_dist' is empty or None, handle it safely
-        freq_dist = strinfo.get("freq_dist", pd.DataFrame())
-        if isinstance(freq_dist, pd.DataFrame) and freq_dist.empty:
-            print("Frequency data is empty, skipping plot generation.")  # Debug statement
-            plotly_plot_json_datab, plotly_plot_json_layoutb = dict(), dict()  # Return empty data
-        else:
-            plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON(genome_query, freq_dist)
+        seq_data = strinfo.get('seq_data', "No sequence information currently available")
+
+        # Generate Plotly JSON for frequency data
+        plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON(genome_query, strinfo.get("freq_dist", []))
+
+        # Handle cases where frequency data is missing
+        if not plotly_plot_json_datab or not plotly_plot_json_layoutb:
+            plotly_plot_json_datab = ""
+            plotly_plot_json_layoutb = ""
 
     except Exception as e:
-        print(f"Error fetching STR info: {e}")  # Debug statement
         return render_template('500.html', emsg="Error fetching STR info"), 500
 
-    # Render the locus page
+    # Render the locus page even if some data is missing
     return render_template('locus.html', 
                            strid=str_query,
-                           graphJSONx=plotly_plot_json_datab,
-                           graphlayoutx=plotly_plot_json_layoutb,
+                           graphJSONx=plotly_plot_json_datab,  
+                           graphlayoutx=plotly_plot_json_layoutb,  
                            chrom=strinfo.get("chrom", "N/A"), 
                            start=strinfo.get("start", "N/A"), 
                            end=strinfo.get("end", "N/A"), 
@@ -114,8 +109,7 @@ def locusview():
                            mut_data=strinfo.get("mut_data", "N/A"),
                            imp_data=strinfo.get("imp_data", "N/A"), 
                            imp_allele_data=strinfo.get("imp_allele_data", "N/A"),
-                           seq_data=strinfo.get("seq_data", "N/A"))
-
+                           seq_data=seq_data)  # Pass safe sequence data
 
 
 

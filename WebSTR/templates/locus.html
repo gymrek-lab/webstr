@@ -116,38 +116,41 @@ $(document).ready(function() {
 		{% endif %}
 		<button class="collapsible active">Sequence Data</button>
 		<div class="content">
-		  {% if seq_data != None %}
-		  <table border="1" cellpadding="5" cellspacing="5" class="tablesorter tablesorter-default">
-			<thead class="tablesorter-header">
-			  <tr>
-				<th class="sequence-column">Sequence</th>
-				<th>AFR</th>
-				<th>AMR</th>
-				<th>EAS</th>
-				<th>EUR</th>
-				<th>SAS</th>
-			  </tr>
-			</thead>
-			<tbody>
-			  {% for row in seq_data %}
-			  <tr>
-				<td class="sequence-column">
-				  {% for nucleotide in row['sequence'] %}
-				  <span class="color-{% if nucleotide == 'A' %}A{% elif nucleotide == 'T' %}T{% elif nucleotide == 'C' %}C{% elif nucleotide == 'G' %}G{% endif %}">{{ nucleotide }}</span>
-				  {% endfor %}
-				</td>
-				<td>{{ row.get('AFR', '&nbsp;') }}</td>
-				<td>{{ row.get('AMR', '&nbsp;') }}</td>
-				<td>{{ row.get('EAS', '&nbsp;') }}</td>
-				<td>{{ row.get('EUR', '&nbsp;') }}</td>
-				<td>{{ row.get('SAS', '&nbsp;') }}</td>
-			  </tr>
-			  {% endfor %}
-			</tbody>
-		  </table>
+			{% if seq_data is string %}
+			<p>{{ seq_data }}</p>  <!-- Simply display the string if seq_data is a string -->
+		  {% elif seq_data %}
+			<table border="1" cellpadding="5" cellspacing="5" class="tablesorter tablesorter-default">
+			  <thead class="tablesorter-header">
+				<tr>
+				  <th class="sequence-column">Sequence</th>
+				  <th>AFR</th>
+				  <th>AMR</th>
+				  <th>EAS</th>
+				  <th>EUR</th>
+				  <th>SAS</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				{% for row in seq_data %}
+				  <tr>
+					<td class="sequence-column">
+					  {% for nucleotide in row['sequence'] %}
+						<span class="color-{% if nucleotide == 'A' %}A{% elif nucleotide == 'T' %}T{% elif nucleotide == 'C' %}C{% elif nucleotide == 'G' %}G{% endif %}">{{ nucleotide }}</span>
+					  {% endfor %}
+					</td>
+					<td>{{ row.get('AFR', '&nbsp;') }}</td>
+					<td>{{ row.get('AMR', '&nbsp;') }}</td>
+					<td>{{ row.get('EAS', '&nbsp;') }}</td>
+					<td>{{ row.get('EUR', '&nbsp;') }}</td>
+					<td>{{ row.get('SAS', '&nbsp;') }}</td>
+				  </tr>
+				{% endfor %}
+			  </tbody>
+			</table>
 		  {% else %}
-		  No sequence data available.
+			<p>No sequence data available.</p>
 		  {% endif %}
+		  
 		</div>
 		<br>
 		{% if mut_data != None %}
