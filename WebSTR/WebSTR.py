@@ -16,11 +16,11 @@ import sys
 from locus_view import *
 from region_view import *
 from gene_plots import *
-from dash_graphs import add_dash_graphs_to_flask_server
 
 # Grab environment variables
 API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 BASEPATH =  os.environ.get("BASEPATH", "/storage/resources/dbase/human/")
+NODASH = os.environ.get("NODASH", 0) == "1"
 
 #################### Data paths ###############
 RefFaPath_hg19 = os.path.join(BASEPATH, "hg19", "hg19.fa")
@@ -29,7 +29,11 @@ RefFaPath_hg38 = os.path.join(BASEPATH, "hg38", "hg38.fa")
 #################### Set up flask server ###############
 server = Flask(__name__)
 server.secret_key = 'dbSTR' 
-add_dash_graphs_to_flask_server(server)
+
+#################### Set up dash ###############
+if not NODASH:
+    from dash_graphs import add_dash_graphs_to_flask_server
+    add_dash_graphs_to_flask_server(server)
  
 #################### Render region page ###############
 @server.route('/search')
