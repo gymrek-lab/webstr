@@ -319,7 +319,7 @@ def GetSeqDataAPI(repeat_id):
         sys.stderr.write("WARNING: could not access allseq table from API\n")
         return None
     df = pd.DataFrame.from_records(resp.json())
-    if df.shape[0] == 0:
+    if df.empty:
         return None
     agg_df = df.pivot_table(index='sequence', columns='population', values='frequency', aggfunc='first').reset_index()
     agg_df = agg_df.fillna(0)
