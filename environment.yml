@@ -1,0 +1,16 @@
+name: webstr
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - python=3.12
+  - flask=3.0.3
+  - requests=2.32.3
+  - pyfaidx=0.8.1.2
+  - pandas=2.2.2
+  - plotly=5.24.1
+  - dash=2.14.2
+  - pip
+  - pip:
+    - dash-bio==1.0.1
