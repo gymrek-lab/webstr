@@ -19,7 +19,8 @@ from gene_plots import *
 from dash_graphs import add_dash_graphs_to_flask_server
 
 # Grab environment variables
-API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+#API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+API_URL = os.environ.get("WEBSTR_API_URL", 'https://webstr-api.lsfm.zhaw.ch')
 BASEPATH =  os.environ.get("BASEPATH", "/storage/resources/dbase/human/")
 
 #################### Data paths ###############

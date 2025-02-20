@@ -17,7 +17,8 @@ GENE_WIDTH = 0.03
 GENE_COLOR = "black"
 
 # Set up API
-API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+#API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+API_URL = os.environ.get("WEBSTR_API_URL", 'https://webstr-api.lsfm.zhaw.ch')
 
 def GetGeneShapes(region_query, region_genome, DbSTRPath=None):
     region_query = CleanRegionQuery(region_query)

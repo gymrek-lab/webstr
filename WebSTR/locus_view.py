@@ -9,7 +9,8 @@ import plotly
 import plotly.graph_objs as go
 import sys
 
-API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+#API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+API_URL = os.environ.get("WEBSTR_API_URL", 'https://webstr-api.lsfm.zhaw.ch')
 
 seqbuf = 120
 seqbreakline = 100

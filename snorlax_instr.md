@@ -9,7 +9,7 @@ ssh -L 5001:localhost:5001 $USER@snorlax.ucsd.edu
 2. If you are using the production version of the database, set `WEBSTR_API_URL`:
 
 ```
-export WEBSTR_API_URL=http://webstr-api.ucsd.edu
+export WEBSTR_API_URL=https://webstr-api.lsfm.zhaw.ch
 ```
 
 Otherwise, follow step 3.

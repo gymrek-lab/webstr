@@ -9,8 +9,8 @@ from flask import render_template
 import pandas as pd
 import requests
 
-API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
-
+#API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
+API_URL = os.environ.get("WEBSTR_API_URL", 'https://webstr-api.lsfm.zhaw.ch')
 
 def GetCrcExprRepeatLenCorrInfoAPI():
     """

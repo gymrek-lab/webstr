@@ -87,7 +87,7 @@ docker run --mount type=bind,src=${BASEPATH},dst=/data --env BASEPATH=/data  -it
 
 ## WebSTR Backend - database and API
 
-WebSTR access its database through an API. By default, it uses http://webstr-api.ucsd.edu. To set a custom location for the API, for example if you are testing a non-production version of the database, you can set a different location using the `WEBSTR_API_URL` environment variable.
+WebSTR access its database through an API. By default, it uses https://webstr-api.lsfm.zhaw.ch. To set a custom location for the API, for example if you are testing a non-production version of the database, you can set a different location using the `WEBSTR_API_URL` environment variable.
 
 The code for the WebSTR-API backend is maintained [here](https://github.com/acg-team/webSTR-API). If you have your own version of the database and want to test the backend locally you will need to run something like the following from inside the `webSTR-API` repo:
 

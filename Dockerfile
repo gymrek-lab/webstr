@@ -25,7 +25,7 @@ WORKDIR /app/WebSTR
 ARG PORT=5000
 ENV FLASK_PORT=${PORT}
 # Overrides ling to WebSTR api that python modules use
-ENV WEBSTR_API_URL=http://webstr-api.ucsd.edu
+ENV WEBSTR_API_URL=https://webstr-api.lsfm.zhaw.ch
 # Tells flask command where to look for the app
 ENV FLASK_APP=WebSTR:server
 # Turns on Flask debug
