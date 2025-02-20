@@ -11,6 +11,7 @@ import sys
 
 #API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 API_URL = os.environ.get("WEBSTR_API_URL", 'https://webstr-api.lsfm.zhaw.ch')
+SEQ_API_URL = 'http://webstr-db.ucsd.edu:5000/'
 
 seqbuf = 120
 seqbreakline = 100
@@ -314,7 +315,7 @@ def GetFreqPlotHg38(freq_dist):
 ################ Get sequence info (specific to hg38) #######
 
 def GetSeqDataAPI(repeat_id):
-    seq_url = API_URL + '/allseq/?repeat_id=' + repeat_id
+    seq_url = SEQ_API_URL + '/allseq/?repeat_id=' + repeat_id
     resp = requests.get(seq_url)
     if resp.status_code == 404:
         sys.stderr.write("WARNING: could not access allseq table from API\n")
