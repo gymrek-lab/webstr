@@ -9,6 +9,8 @@ import plotly
 import plotly.graph_objs as go
 import sys
 
+
+
 #API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 API_URL = os.environ.get("WEBSTR_API_URL", 'https://webstr-api.lsfm.zhaw.ch')
 SEQ_API_URL = 'http://webstr-db.ucsd.edu:5000/'
@@ -330,3 +332,42 @@ def GetSeqDataAPI(repeat_id):
     seq_data = agg_df.to_dict(orient='records')
     seq_data = sorted(seq_data, key=lambda x: len(x['sequence']))
     return seq_data
+
+################ GWAS plots #####################
+
+from plotly_rewrite import query_allele_data, filter_allele_data, generate_figure_plotly
+
+def GetGWASPlotData(repeat_id, db_path):
+    """
+    Get GWAS trait association data for a specific repeat ID
+    
+    Args:
+        repeat_id (str): The repeat ID to look up
+        db_path (str): Path to the SQLite database
+    
+    Returns:
+        dict: Plotly figure as JSON or None if no data found
+    """
+    # Query the database for allele data
+    dosage_dict, mean_dict, ci_dict = query_allele_data(db_path, repeat_id)
+    
+    # If no data found, return None
+    if not dosage_dict:
+        return None
+    
+    # Filter the data with default parameters
+    dosage_dict, mean_dict, ci_dict = filter_allele_data(
+        dosage_dict, mean_dict, ci_dict, 
+        count_threshold=100, 
+        max_ci_range=None, 
+        max_relative_ci_range=None
+    )
+    
+    # Generate the Plotly figure
+    fig = generate_figure_plotly(dosage_dict, mean_dict, ci_dict)
+    
+    if fig is None:
+        return None
+    
+    # Convert the figure to JSON
+    return fig.to_json()

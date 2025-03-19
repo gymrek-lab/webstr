@@ -150,6 +150,32 @@ $(document).ready(function() {
 		  {% endif %}
 		</div>
 		<br>
+
+		<!-- GWAS plot  -->
+		{% if gwas_plot_json %}
+		<div class="row">
+			<div class="col-md-12">
+				<div class="card">
+					<div class="card-header">
+						<h5 class="card-title">GWAS Trait Associations</h5>
+					</div>
+					<div class="card-body">
+						<div id="gwas-plot" class="plotly-graph-div"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			// Parse the JSON string into a JavaScript object
+			var gwasPlotData = {{ gwas_plot_json | safe }};
+			
+			// Render the plot
+			Plotly.newPlot('gwas-plot', gwasPlotData.data, gwasPlotData.layout);
+		</script>
+		{% endif %}
+		<br>
+
 		{% if mut_data != None %}
 		<button class="collapsible active">Mutation and constraint</button>
 		<div class="content">

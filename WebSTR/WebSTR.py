@@ -17,11 +17,14 @@ from locus_view import *
 from region_view import *
 from gene_plots import *
 from dash_graphs import add_dash_graphs_to_flask_server
+from plotly_rewrite import query_allele_data, filter_allele_data, generate_figure_plotly
+
 
 # Grab environment variables
 #API_URL = os.environ.get("WEBSTR_API_URL",'http://webstr-api.ucsd.edu')
 API_URL = os.environ.get("WEBSTR_API_URL", 'https://webstr-api.lsfm.zhaw.ch')
 BASEPATH =  os.environ.get("BASEPATH", "/storage/resources/dbase/human/")
+LOCUS_DB_PATH = os.environ.get("LOCUS_DB_PATH", "/locus_data.db")
 
 #################### Data paths ###############
 RefFaPath_hg19 = os.path.join(BASEPATH, "hg19", "hg19.fa")
@@ -70,6 +73,9 @@ def locusview():
     # Plotting info
     plotly_plot_json_datab, plotly_plot_json_layoutb = GetFreqPlotlyJSON(genome_query, strinfo["freq_dist"])
 
+    # gwas plot
+    gwas_plot_json = GetGWASPlotData(str_query, LOCUS_DB_PATH)
+
     # Render
     return render_template('locus.html', strid=str_query,
                            graphJSONx=plotly_plot_json_datab, graphlayoutx=plotly_plot_json_layoutb, 
@@ -78,7 +84,8 @@ def locusview():
                            motif=strinfo["motif"], copies=strinfo["copies"], crc_data=strinfo["crc_data"],
                            estr=strinfo["gtex_data"], mut_data=strinfo["mut_data"],
                            imp_data=strinfo["imp_data"], imp_allele_data=strinfo["imp_allele_data"],
-                           seq_data=strinfo["seq_data"])
+                           seq_data=strinfo["seq_data"],
+                           gwas_plot_json=gwas_plot_json)
 
 #################### Render other HTML pages ###############
 
