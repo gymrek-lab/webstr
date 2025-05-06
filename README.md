@@ -18,8 +18,9 @@ If you would like to make changes to WebSTR, you must:
 1. Set up python3 and virtualenv on your machine:
 [For Mac, follow instructions here.](https://gist.github.com/pandafulmanda/730a9355e088a9970b18275cb9eadef3)
 
-2. Create a new virtual env with python3 and install all the requirements with the following command:
-`pip install -r requirements.txt`
+2. Create a new conda environment with python3 and install all the requirements with the following command:
+
+`conda env create -f environment.yml`
 
 3. Copy data files to data directory
 
