@@ -42,14 +42,12 @@ $(document).ready(function() {
 			{{ strseq|safe }}
 		  </p>
 		</div>
-		<button class="collapsible active">Gene mapping</button>
+		{% if gene_name != "" %}
+		<button class="collapsible active">Overlapping gene</button>
 		<div class="content">
-		  {% if gene_name == "" %}
-		  <p>No gene information available</p>
-		  {% else %}
-		  <p>Maps to {{ gene_name }}, {{ gene_desc }}</p>
-		  {% endif %}
+		  <p>{{ gene_name }}, {{ gene_desc }}</p>
 		</div>
+		{% endif %}
 		{% if graphJSONx != {} %}
 		<button class="collapsible active">Allele Frequency</button>
 		<div class="content">
