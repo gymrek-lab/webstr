@@ -316,7 +316,6 @@ def GetFreqPlotHg38(freq_dist):
 ################ Get sequence info (specific to hg38) #######
 
 def GetSeqDataAPI(repeat_id):
-    return None # TODO add back once this is less slow
     seq_url = SEQ_API_URL + '/allseq/?repeat_id=' + repeat_id
     try:
         resp = requests.get(seq_url)
