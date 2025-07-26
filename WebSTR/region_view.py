@@ -251,5 +251,9 @@ def GetRegionDataAPI(region_query):
     resp = requests.get(strexp_url)
     df_hg38 = pd.DataFrame.from_records(resp.json())
     df_hg38.rename(columns={'repeat_id': 'strid'}, inplace=True)
+    try:
+        df_hg38 = df_hg38.sort_values(["panel","start"])
+    except:
+        df_hg38 = df_hg38
     return df_hg38
 
