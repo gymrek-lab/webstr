@@ -86,7 +86,7 @@ def GetSTRMetadataHg19(strid, DbSTRPath):
     }
 
 def GetSTRMetadataAPI(repeat_id):
-    repeat_url = API_URL + '/repeatinfo/?repeat_id=' + repeat_id 
+    repeat_url = API_URL + '/repeatinfo/?repeat_id=' + repeat_id
     resp = requests.get(repeat_url)
     repeat = json.loads(resp.text)
     strinfo = {
@@ -170,7 +170,7 @@ def GetFreqSTRInfo(strid, DbSTRPath):
     else: return df
 
 def GetFreqSTRInfoAPI(repeat_id):
-    repeat_url = API_URL + '/allfreqs/?repeat_id=' + repeat_id     
+    repeat_url = API_URL + '/allfreqs/?repeat_id=' + repeat_id
     resp = requests.get(repeat_url)
     df = pd.DataFrame.from_records(json.loads(resp.text))
     if not df.empty:
@@ -316,6 +316,7 @@ def GetFreqPlotHg38(freq_dist):
 ################ Get sequence info (specific to hg38) #######
 
 def GetSeqDataAPI(repeat_id):
+    return None # TODO add back once this is less slow
     seq_url = SEQ_API_URL + '/allseq/?repeat_id=' + repeat_id
     try:
         resp = requests.get(seq_url)
